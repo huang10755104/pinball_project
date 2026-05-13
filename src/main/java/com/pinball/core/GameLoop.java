@@ -3,6 +3,7 @@ package com.pinball.core;
 import com.pinball.ui.PinballCanvas;
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 public class GameLoop extends AnimationTimer {
     private final PhysicsEngine physicsEngine;
@@ -26,6 +27,8 @@ public class GameLoop extends AnimationTimer {
         physicsEngine.checkCollision();
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setFill(Color.web("#102030"));
+        gc.clearRect(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
         canvas.draw(gc);
 
         lastTime = now;
