@@ -75,6 +75,10 @@ public class PinballController {
     }
 
     private void updatePhysics() {
+        double previousY = ui.ball.getCenterY();
+        
+        physics.updatePosition(GRAVITY, FRICTION);
+        
         double currentLeftAngle = ui.leftFlipperRotate.getAngle();
         if (currentLeftAngle > leftTargetAngle) {
             currentLeftAngle = Math.max(leftTargetAngle, currentLeftAngle - FLIPPER_SPEED);
@@ -90,11 +94,6 @@ public class PinballController {
             currentRightAngle = Math.max(rightTargetAngle, currentRightAngle - FLIPPER_SPEED);
         }
         ui.rightFlipperRotate.setAngle(currentRightAngle);
-
-
-        double previousY = ui.ball.getCenterY();
-
-        physics.updatePosition(GRAVITY, FRICTION);
 
         // ================== 通用物理靜態碰撞區 ==================
 
@@ -134,7 +133,7 @@ public class PinballController {
                 }
             } else {
                 if (physics.speedY > 0) {
-                    physics.speedY = -physics.speedY * 0.4; 
+                    physics.speedY = -physics.speedY * 0.1; 
                     if (hitLeft) {
                         physics.speedX += (currentLeftAngle <= 0) ? -1.0 : 1.0; 
                     }

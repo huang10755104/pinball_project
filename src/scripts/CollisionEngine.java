@@ -24,7 +24,6 @@ public class CollisionEngine {
 
         double dotProduct = speedX * nx + speedY * ny;
         
-        // 若內積大於0，表示物體已經在遠離表面，不執行反彈
         if (dotProduct > 0) return;
 
         double normalVelX = dotProduct * nx;

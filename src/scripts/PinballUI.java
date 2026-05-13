@@ -38,7 +38,7 @@ public class PinballUI {
         root.setStyle("-fx-background-color: #1e1e2e;");
         root.setPadding(new Insets(20, 25, 20, 25));
 
-        // ================= 1. 頂部區域 =================
+        // ================= 頂部區域 =================
         exitBtn = new Button("❌ 離開遊戲");
         exitBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #f38ba8; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 0;");
 
@@ -51,16 +51,16 @@ public class PinballUI {
         topBox.setPadding(new Insets(0, 0, 15, 0));
         root.setTop(topBox);
 
-        // ================= 2. 中央遊戲台區域 =================
+        // ================= 中央遊戲台區域 =================
         gameBoard = new Pane();
         gameBoard.setPrefSize(400, 550);
         gameBoard.setMaxSize(400, 550);
         gameBoard.setStyle("-fx-background-color: #11111b; -fx-border-color: #45475a; -fx-border-width: 4px; -fx-border-radius: 12px; -fx-background-radius: 12px;");
 
         bumpers = new Circle[3];
-        bumpers[0] = new Circle(120, 150, 25, Color.valueOf("#f38ba8")); 
-        bumpers[1] = new Circle(280, 150, 25, Color.valueOf("#f38ba8"));
-        bumpers[2] = new Circle(200, 250, 30, Color.valueOf("#cba6f7")); 
+        bumpers[0] = new Circle(100, 150, 25, Color.valueOf("#f38ba8")); 
+        bumpers[1] = new Circle(260, 150, 25, Color.valueOf("#f38ba8"));
+        bumpers[2] = new Circle(180, 250, 30, Color.valueOf("#cba6f7")); 
 
         launchWall = new Rectangle(350, 100, 5, 450);
         launchWall.setFill(Color.valueOf("#45475a"));
@@ -68,7 +68,6 @@ public class PinballUI {
         topDeflector = new Polygon(330.0, 0.0, 400.0, 0.0, 400.0, 70.0);
         topDeflector.setFill(Color.valueOf("#f9e2af"));
 
-        // ================= 3. 靜態斜板與擋板設計 =================
 
         leftInlane = new Line(5, 432, 100, 470);
         leftInlane.setStroke(Color.valueOf("#45475a"));
@@ -98,7 +97,7 @@ public class PinballUI {
         boardContainer.setAlignment(Pos.CENTER);
         root.setCenter(boardContainer);
 
-        // ================= 4. 底部控制區域 =================
+        // ================= 底部控制區域 =================
         launchBtn = new Button("🚀 發射彈珠");
         launchBtn.setStyle("-fx-background-color: #f9e2af; -fx-text-fill: #11111b; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8px; -fx-pref-width: 200px; -fx-pref-height: 45px; -fx-cursor: hand;");
 
