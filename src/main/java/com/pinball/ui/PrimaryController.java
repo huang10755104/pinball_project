@@ -25,23 +25,33 @@ public class PrimaryController {
     private void initialize() {
         physicsEngine = new PinballPhysicsEngine();
 
+        // 初始化彈珠
         Ball ball = new Ball(120.0, 120.0, 12.0);
         ball.setVelocityX(180.0);
         ball.setVelocityY(0.0);
         physicsEngine.addBall(ball);
 
+        // 建立遊戲邊界牆，形成封閉的遊戲區域（800x600 畫布，邊距 20 像素）
+        // 上邊界
         physicsEngine.addCollisionObject(new Wall(20.0, 20.0, 780.0, 20.0));
+        // 右邊界
         physicsEngine.addCollisionObject(new Wall(780.0, 20.0, 780.0, 580.0));
+        // 下邊界
         physicsEngine.addCollisionObject(new Wall(780.0, 580.0, 20.0, 580.0));
+        // 左邊界
         physicsEngine.addCollisionObject(new Wall(20.0, 580.0, 20.0, 20.0));
+        
+        // 新增碰撞球
         physicsEngine.addCollisionObject(new Bumper(260.0, 220.0, 28.0));
         physicsEngine.addCollisionObject(new Bumper(520.0, 300.0, 32.0, 0.92));
 
+        // 初始化翻轉器
         leftFlipper = new Flipper(280.0, 510.0, 110.0, -0.18, -0.95, 8.5, 0.95);
         rightFlipper = new Flipper(520.0, 510.0, 110.0, Math.PI - 0.18, Math.PI + 0.95, 8.5, 0.95);
         physicsEngine.addCollisionObject(leftFlipper);
         physicsEngine.addCollisionObject(rightFlipper);
 
+        // 初始化畫布
         pinballCanvas = new PinballCanvas(800.0, 600.0);
         pinballCanvas.setPhysicsEngine(physicsEngine);
         canvasContainer.getChildren().add(pinballCanvas);
@@ -49,6 +59,7 @@ public class PrimaryController {
         installKeyHandlers();
         Platform.runLater(canvasContainer::requestFocus);
 
+        // 啟動遊戲迴圈
         gameLoop = new GameLoop(physicsEngine, pinballCanvas);
         gameLoop.start();
     }

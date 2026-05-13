@@ -2,6 +2,7 @@ package com.pinball.model;
 
 import com.pinball.core.Renderable;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
 public class Ball implements Renderable {
@@ -17,6 +18,7 @@ public class Ball implements Renderable {
     private double accelerationX;
     private double accelerationY;
     private double radius;
+    private Image ballImage;
 
     public Ball(double positionX, double positionY) {
         this(positionX, positionY, DEFAULT_RADIUS);
@@ -47,10 +49,25 @@ public class Ball implements Renderable {
     @Override
     public void draw(GraphicsContext gc) {
         double diameter = radius * 2.0;
-        gc.setFill(Color.GOLD);
-        gc.fillOval(positionX - radius, positionY - radius, diameter, diameter);
-        gc.setStroke(Color.BLACK);
-        gc.strokeOval(positionX - radius, positionY - radius, diameter, diameter);
+        
+        if (ballImage != null) {
+            // 使用圖像繪製彈珠
+            gc.drawImage(ballImage, positionX - radius, positionY - radius, diameter, diameter);
+        } else {
+            // 預設幾何繪製
+            gc.setFill(Color.GOLD);
+            gc.fillOval(positionX - radius, positionY - radius, diameter, diameter);
+            gc.setStroke(Color.BLACK);
+            gc.strokeOval(positionX - radius, positionY - radius, diameter, diameter);
+        }
+    }
+
+    public void setBallImage(Image ballImage) {
+        this.ballImage = ballImage;
+    }
+
+    public Image getBallImage() {
+        return ballImage;
     }
 
     public double getPositionX() {
