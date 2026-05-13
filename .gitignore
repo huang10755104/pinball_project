@@ -1,0 +1,21 @@
+# Compiled output
+/target/
+
+# Maven
+/.mvn/
+
+# IntelliJ IDEA
+/.idea/
+*.iml
+
+# VS Code
+/.vscode/
+
+# Eclipse
+/.classpath
+/.project
+/.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
