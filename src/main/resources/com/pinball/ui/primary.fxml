@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 
-<Pane fx:id="canvasContainer" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pinball.ui.PrimaryController">
-</Pane>
+<StackPane fx:id="canvasContainer" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pinball.ui.PrimaryController" style="-fx-background-color: #1e1e2e;">
+</StackPane>

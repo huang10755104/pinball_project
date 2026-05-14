@@ -23,7 +23,7 @@ public class Wall extends GameObject {
 
     @Override
     public void draw(GraphicsContext gc) {
-        gc.setStroke(Color.DARKSLATEGRAY);
+        gc.setStroke(Color.web("#45475a"));
         gc.setLineWidth(3.0);
         gc.strokeLine(startX, startY, endX, endY);
     }
