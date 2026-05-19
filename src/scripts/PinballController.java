@@ -1,5 +1,7 @@
 package scripts;
 
+import java.io.File;
+import javafx.scene.media.AudioClip;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -16,6 +18,10 @@ public class PinballController {
     private int score = 0;
     private boolean isPlaying = false;
 
+    private AudioClip flipperSound;
+    private AudioClip bumperSound;
+    private AudioClip launchSound;
+
     // 彈珠物理變數
     private final double GRAVITY = 0.1;
     private final double FRICTION = 0.99;
@@ -31,8 +37,24 @@ public class PinballController {
         ui.exitBtn.setOnAction(e -> onExitAction.run());
         physics = new CollisionEngine(ui.ball);
 
+        initAudio();
         setupListeners();
         setupGameLoop();
+    }
+
+    private void initAudio() {
+        try {
+            // 使用 File 轉換路徑，確保無論在 IDE 還是命令列都能讀取到
+            String flipperPath = new File("src/res/audios/flipper.mp3").toURI().toString();
+            String bumperPath = new File("src/res/audios/bumper.mp3").toURI().toString();
+            String launchPath = new File("src/res/audios/launch.mp3").toURI().toString();
+
+            flipperSound = new AudioClip(flipperPath);
+            bumperSound = new AudioClip(bumperPath);
+            launchSound = new AudioClip(launchPath);
+        } catch (Exception e) {
+            System.out.println("音效載入失敗 (如果尚未準備音效檔，可忽略此訊息): " + e.getMessage());
+        }
     }
 
     public Scene getScene() {
@@ -49,8 +71,10 @@ public class PinballController {
         scene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.LEFT) {
                 leftTargetAngle = -20;
+                if (flipperSound != null) flipperSound.play(0.4);
             } else if (event.getCode() == KeyCode.RIGHT) {
                 rightTargetAngle = 20;
+                if (flipperSound != null) flipperSound.play(0.4);
             }
         });
 
@@ -106,7 +130,10 @@ public class PinballController {
         physics.checkLineCollision(ui.rightInlane, 0.3);
 
         for (Circle bumper : ui.bumpers) {
-            if (physics.checkCircleCollision(bumper, 1.2)) addScore(100);
+            if (physics.checkCircleCollision(bumper, 1.2)){
+                addScore(100);
+                if (bumperSound != null) bumperSound.play(0.6);
+            } 
         }
 
         // ================== 動態玩家控制區 ==================
@@ -128,7 +155,7 @@ public class PinballController {
                     distanceFromPivot = Math.max(0, Math.min(distanceFromPivot, 80)); 
                     
                     double powerMultiplier = 1.0 + (distanceFromPivot / 80.0) * 0.6;
-                    physics.speedY = -11 * powerMultiplier; 
+                    physics.speedY = -9 * powerMultiplier; 
                     physics.speedX = (hitLeft ? 5 : -5) * (distanceFromPivot / 80.0);
                 }
             } else {
@@ -164,7 +191,7 @@ public class PinballController {
         ui.launchBtn.setDisable(true);
         score = 0;
         addScore(0);
-        
+        if (launchSound != null) launchSound.play(1.0);
         // 初始發射力道 (往上並往左拋出通道)
         physics.speedY = -20;
         physics.speedX = 2;
