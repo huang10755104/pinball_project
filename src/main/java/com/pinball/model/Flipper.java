@@ -51,7 +51,7 @@ public class Flipper extends GameObject {
         double step = angularSpeed * deltaTime;
         if (Math.abs(angleDelta) <= step) {
             currentAngle = targetAngle;
-            angularVelocity = (currentAngle - previousAngle) / deltaTime;
+            angularVelocity = (currentAngle - previousAngle) / (deltaTime * 1.1);
             return;
         }
 
