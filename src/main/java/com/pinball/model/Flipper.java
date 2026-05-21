@@ -56,7 +56,7 @@ public class Flipper extends GameObject {
         }
 
         currentAngle += Math.copySign(step, angleDelta);
-        angularVelocity = (currentAngle - previousAngle) / deltaTime;
+        angularVelocity = (currentAngle - previousAngle) / (deltaTime * 1.1);
     }
 
     public void extend() {
