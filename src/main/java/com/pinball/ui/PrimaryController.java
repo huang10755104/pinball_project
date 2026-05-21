@@ -75,11 +75,29 @@ public class PrimaryController {
 
         // 7. 發射通道 (加寬防卡死)
         physicsEngine.addCollisionObject(new Wall(360, 100, 360, 550));
-        physicsEngine.addCollisionObject(new Wall(400, 100, 400, 550));
+        physicsEngine.addCollisionObject(new Wall(360, 100, 345, 150));
+        // physicsEngine.addCollisionObject(new Wall(400, 100, 400, 550));
 
         // 8. 發射通道頂部導流屋頂 (防止飛到外太空，強迫彎入主台面)
-        physicsEngine.addCollisionObject(new Wall(400, 100, 360, 30));
-        physicsEngine.addCollisionObject(new Wall(360, 30, 310, 70)); // 完美接合頂部圓弧
+        // physicsEngine.addCollisionObject(new Wall(400, 100, 360, 30));
+        physicsEngine.addCollisionObject(new Wall(300, 30, 280, 50)); // 完美接合頂部圓弧
+        
+        
+        // 9. 圓形彈簧旁的牆
+        physicsEngine.addCollisionObject(new Wall(320, 100, 330, 120));
+        physicsEngine.addCollisionObject(new Wall(330, 120, 330, 140));
+        physicsEngine.addCollisionObject(new Wall(330, 140, 300, 220));
+        Wall rightBumperWall = new Wall(300, 220, 260, 260);
+        rightBumperWall.setBounciness(1.2);
+        physicsEngine.addCollisionObject(rightBumperWall);
+
+        physicsEngine.addCollisionObject(new Wall(80, 140, 80, 220));
+        Wall leftBumperWall = new Wall(80, 220, 140, 240);
+        leftBumperWall.setBounciness(1.5);
+        physicsEngine.addCollisionObject(leftBumperWall);
+        physicsEngine.addCollisionObject(new Wall(140, 240, 80, 260));
+        physicsEngine.addCollisionObject(new Wall(80, 260, 50, 220));
+        physicsEngine.addCollisionObject(new Wall(50, 220, 80, 140));
         // =======================================================
 
         // 實例化台面動態物件
@@ -88,12 +106,12 @@ public class PrimaryController {
         ball.setVelocityY(0.0); 
         physicsEngine.addBall(ball);
         
-        physicsEngine.addCollisionObject(new Bumper(130.0, 200.0, 15.0));
-        physicsEngine.addCollisionObject(new Bumper(200.0, 250.0, 15.0));
-        physicsEngine.addCollisionObject(new Bumper(270.0, 180.0, 15.0, 0.92));
+        physicsEngine.addCollisionObject(new Bumper(150.0, 150.0, 15.0));
+        physicsEngine.addCollisionObject(new Bumper(200.0, 200.0, 15.0));
+        physicsEngine.addCollisionObject(new Bumper(250.0, 130.0, 15.0, 0.92));
 
-        leftFlipper = new Flipper(105.0, 480.0, 60.0, 0.18, -0.85, 8.5, 0.95);
-        rightFlipper = new Flipper(245.0, 480.0, 60.0, Math.PI - 0.18, Math.PI + 0.85, 8.5, 0.95);
+        leftFlipper = new Flipper(110.0, 480.0, 60.0, 0.48, -0.85, 8.5, 0.95);
+        rightFlipper = new Flipper(240.0, 480.0, 60.0, Math.PI - 0.48, Math.PI + 0.85, 8.5, 0.95);
         physicsEngine.addCollisionObject(leftFlipper);
         physicsEngine.addCollisionObject(rightFlipper);
 
