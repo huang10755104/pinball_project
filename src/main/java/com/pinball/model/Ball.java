@@ -48,7 +48,7 @@ public class Ball implements Renderable {
 
     @Override
     public void draw(GraphicsContext gc) {
-        double diameter = radius * 2.0;
+        double diameter = radius * 2.7;
         
         if (ballImage != null) {
             // 使用圖像繪製彈珠
