@@ -14,6 +14,7 @@ public class PinballPhysicsEngine implements PhysicsEngine {
     private static final double GRAVITY = 980.0;
     private static final double NO_HIT = 1_000_000_000.0;
     private static final double CONTACT_EPSILON = 0.0005;
+    private static final SoundManager sound = new SoundManager();
 
     private final List<Ball> balls = new ArrayList<>();
     private final List<GameObject> collisionObjects = new ArrayList<>();
@@ -244,6 +245,7 @@ public class PinballPhysicsEngine implements PhysicsEngine {
         ball.setVelocityX(reflectedVelocityX);
         ball.setVelocityY(reflectedVelocityY);
         bumper.registerHit();
+        sound.playBumper(0.3);
     }
 
     private void resolveWallCollision(Ball ball, Wall wall) {
