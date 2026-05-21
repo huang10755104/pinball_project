@@ -48,7 +48,7 @@ public class Ball implements Renderable {
 
     @Override
     public void draw(GraphicsContext gc) {
-        double diameter = radius * 2.7;
+        double diameter = radius * 2.0;
         
         if (ballImage != null) {
             // 使用圖像繪製彈珠
@@ -57,8 +57,9 @@ public class Ball implements Renderable {
             // 預設幾何繪製
             gc.setFill(Color.GOLD);
             gc.fillOval(positionX - radius, positionY - radius, diameter, diameter);
-            gc.setStroke(Color.BLACK);
-            gc.strokeOval(positionX - radius, positionY - radius, diameter, diameter);
+            // gc.setStroke(Color.BLACK);
+            // gc.setLineWidth(2.0);
+            // gc.strokeOval(positionX - radius, positionY - radius, diameter, diameter);
         }
     }
 

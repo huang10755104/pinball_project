@@ -106,8 +106,29 @@ public class PinballPhysicsEngine implements PhysicsEngine {
         double offsetX = ballX - closestX;
         double offsetY = ballY - closestY;
         double distance = Math.hypot(offsetX, offsetY);
+        
+        boolean crossed = false;
+        double originX = ball.getPreviousPositionX();
+        double originY = ball.getPreviousPositionY();
+        double deltaX = ballX - originX;
+        double deltaY = ballY - originY;
+        double travelDistance = Math.hypot(deltaX, deltaY);
 
-        if (distance > ball.getRadius()) {
+        if (travelDistance > 0.0) {
+            double[] hitPoint = new double[2];
+            // 檢查球心軌跡是否直接切過檔板線段
+            double hitDistance = rayIntersectLine(
+                    originX, originY, 
+                    deltaX / travelDistance, deltaY / travelDistance, travelDistance,
+                    startX, startY, endX, endY, hitPoint);
+            
+            if (hitDistance < NO_HIT) {
+                crossed = true;
+            }
+        }
+
+        // 修正：如果距離大於半徑，且「沒有」發生軌跡交叉，才判定為未碰撞
+        if (distance > ball.getRadius() && !crossed) {
             return;
         }
 
@@ -228,79 +249,118 @@ public class PinballPhysicsEngine implements PhysicsEngine {
     private void resolveWallCollision(Ball ball, Wall wall) {
         double originX = ball.getPreviousPositionX();
         double originY = ball.getPreviousPositionY();
-        double deltaX = ball.getPositionX() - originX;
-        double deltaY = ball.getPositionY() - originY;
+        double ballX = ball.getPositionX();
+        double ballY = ball.getPositionY();
+        double deltaX = ballX - originX;
+        double deltaY = ballY - originY;
         double travelDistance = Math.hypot(deltaX, deltaY);
 
-        if (travelDistance <= 0.0) {
-            return;
-        }
+        double wallDx = wall.getEndX() - wall.getStartX();
+        double wallDy = wall.getEndY() - wall.getStartY();
+        double wallLenSq = wallDx * wallDx + wallDy * wallDy;
 
-        double directionX = deltaX / travelDistance;
-        double directionY = deltaY / travelDistance;
-        double[] hitPoint = new double[2];
+        if (wallLenSq == 0.0) return;
 
-        // 維持原本的中心點射線檢測
-        double hitDistance = rayIntersectLine(
-                originX, originY,
-                directionX, directionY,
-                travelDistance,
-                wall.getStartX(), wall.getStartY(),
-                wall.getEndX(), wall.getEndY(),
-                hitPoint);
-
-        if (hitDistance >= NO_HIT) {
-            return;
-        }
-
-        double normalX = wall.getEndY() - wall.getStartY();
-        double normalY = -(wall.getEndX() - wall.getStartX());
-        double normalLength = Math.hypot(normalX, normalY);
-        if (normalLength == 0.0) {
-            return;
-        }
+        double normalX = wallDy;
+        double normalY = -wallDx;
+        double normalLength = Math.sqrt(wallLenSq);
         normalX /= normalLength;
         normalY /= normalLength;
 
         // 確保法向量朝向球的來向
-        double dx = originX - wall.getStartX();
-        double dy = originY - wall.getStartY();
-        if (dx * normalX + dy * normalY < 0) {
+        if ((originX - wall.getStartX()) * normalX + (originY - wall.getStartY()) * normalY < 0) {
             normalX = -normalX;
             normalY = -normalY;
         }
 
-        // 計算移動方向與法向量的內積 (夾角)
-        double dirDotNormal = directionX * normalX + directionY * normalY;
-        if (dirDotNormal >= 0.0) {
-            return; // 球正遠離牆壁
+        // --- 1. 連續碰撞檢測 (CCD)：對平移後的虛擬牆壁射線檢測 ---
+        if (travelDistance > 0.0) {
+            double directionX = deltaX / travelDistance;
+            double directionY = deltaY / travelDistance;
+            
+            // 將牆壁向外平移球的半徑長度，建立「虛擬牆壁」
+            double r = ball.getRadius();
+            double vStartX = wall.getStartX() + normalX * r;
+            double vStartY = wall.getStartY() + normalY * r;
+            double vEndX = wall.getEndX() + normalX * r;
+            double vEndY = wall.getEndY() + normalY * r;
+
+            double[] hitPoint = new double[2];
+            
+            // 使用虛擬牆壁進行相交測試
+            double hitDistance = rayIntersectLine(
+                    originX, originY, directionX, directionY, travelDistance,
+                    vStartX, vStartY, vEndX, vEndY, hitPoint);
+
+            if (hitDistance < NO_HIT) {
+                double velocityX = ball.getVelocityX();
+                double velocityY = ball.getVelocityY();
+                double velocityDotNormal = velocityX * normalX + velocityY * normalY;
+
+                if (velocityDotNormal < 0.0) {
+                    double elasticity = clamp(wall.getBounciness(), 0.0, 1.0);
+                    double reflectedVelocityX = velocityX - (1.0 + elasticity) * velocityDotNormal * normalX;
+                    double reflectedVelocityY = velocityY - (1.0 + elasticity) * velocityDotNormal * normalY;
+
+                    double remainingDistance = Math.max(0.0, travelDistance - hitDistance);
+
+                    // 2. 算出反彈後的新移動方向
+                    double currentSpeed = Math.hypot(reflectedVelocityX, reflectedVelocityY);
+                    if (currentSpeed > 0.0) {
+                        double dirX = reflectedVelocityX / currentSpeed;
+                        double dirY = reflectedVelocityY / currentSpeed;
+                        
+                        // 交點 + 微小法線偏移(防黏牆) + 沿著新方向走完剩下的距離
+                        ball.setPositionX(hitPoint[0] + normalX * CONTACT_EPSILON + dirX * remainingDistance);
+                        ball.setPositionY(hitPoint[1] + normalY * CONTACT_EPSILON + dirY * remainingDistance);
+                    } else {
+                        ball.setPositionX(hitPoint[0] + normalX * CONTACT_EPSILON);
+                        ball.setPositionY(hitPoint[1] + normalY * CONTACT_EPSILON);
+                    }
+
+                    // 寫入新速度並結束
+                    ball.setVelocityX(reflectedVelocityX);
+                    ball.setVelocityY(reflectedVelocityY);
+                    return;
+                }
+            }
         }
 
-        // 計算軌跡退回距離：將球半徑投影回移動軌跡上
-        double backUpDistance = ball.getRadius() / Math.abs(dirDotNormal);
-        double actualHitDistance = hitDistance - backUpDistance;
+        // --- 2. 靜態距離檢測 (DCD Fallback)：處理牆壁端點(角落)擦撞 ---
+        // 重新取得當前座標
+        ballX = ball.getPositionX();
+        ballY = ball.getPositionY();
 
-        // 若小於 0 代表上一影格已經貼著牆
-        actualHitDistance = Math.max(0.0, actualHitDistance);
+        // 找出球心到真實牆壁線段的最短距離點
+        double t = ((ballX - wall.getStartX()) * wallDx + (ballY - wall.getStartY()) * wallDy) / wallLenSq;
+        t = Math.max(0.0, Math.min(1.0, t));
 
-        // 計算邊緣剛好碰到牆壁時的確切球心座標 (沿著原軌跡)
-        double collisionX = originX + directionX * actualHitDistance;
-        double collisionY = originY + directionY * actualHitDistance;
+        double closestX = wall.getStartX() + t * wallDx;
+        double closestY = wall.getStartY() + t * wallDy;
 
-        // 計算速度反彈
-        double velocityX = ball.getVelocityX();
-        double velocityY = ball.getVelocityY();
-        double velocityDotNormal = velocityX * normalX + velocityY * normalY;
+        double offsetX = ballX - closestX;
+        double offsetY = ballY - closestY;
+        double distance = Math.hypot(offsetX, offsetY);
 
-        double elasticity = clamp(wall.getBounciness(), 0.0, 1.0);
-        double reflectedVelocityX = velocityX - (1.0 + elasticity) * velocityDotNormal * normalX;
-        double reflectedVelocityY = velocityY - (1.0 + elasticity) * velocityDotNormal * normalY;
+        // 若球體邊緣已嵌入牆壁內部 (包含牆壁的兩端角落)
+        if (distance > 0.0 && distance < ball.getRadius()) {
+            double pushNormalX = offsetX / distance;
+            double pushNormalY = offsetY / distance;
 
-        // 設定為修正後的座標，並加上極小法線偏移避免黏牆
-        ball.setPositionX(collisionX + normalX * CONTACT_EPSILON);
-        ball.setPositionY(collisionY + normalY * CONTACT_EPSILON);
-        ball.setVelocityX(reflectedVelocityX);
-        ball.setVelocityY(reflectedVelocityY);
+            // 擠出牆外
+            ball.setPositionX(closestX + pushNormalX * (ball.getRadius() + CONTACT_EPSILON));
+            ball.setPositionY(closestY + pushNormalY * (ball.getRadius() + CONTACT_EPSILON));
+
+            double velocityX = ball.getVelocityX();
+            double velocityY = ball.getVelocityY();
+            double vDotN = velocityX * pushNormalX + velocityY * pushNormalY;
+
+            if (vDotN < 0.0) {
+                double elasticity = clamp(wall.getBounciness(), 0.0, 1.0);
+                ball.setVelocityX(velocityX - (1.0 + elasticity) * vDotN * pushNormalX);
+                ball.setVelocityY(velocityY - (1.0 + elasticity) * vDotN * pushNormalY);
+            }
+        }
     }
 
     private double rayIntersectLine(

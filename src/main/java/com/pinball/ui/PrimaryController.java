@@ -52,8 +52,8 @@ public class PrimaryController {
         physicsEngine.addCollisionObject(new Wall(345, 150, 345, 432));
 
         // 3. 內外球道分隔島 (拓寬至 30 pixels)
-        physicsEngine.addCollisionObject(new Wall(30, 320, 30, 410));
-        physicsEngine.addCollisionObject(new Wall(320, 320, 320, 410));
+        physicsEngine.addCollisionObject(new Wall(30, 320, 30, 380));
+        physicsEngine.addCollisionObject(new Wall(320, 320, 320, 380));
 
         // 4. 左側三角彈弓
         physicsEngine.addCollisionObject(new Wall(85, 330, 60, 400));
@@ -88,8 +88,9 @@ public class PrimaryController {
         ball.setVelocityY(0.0); 
         physicsEngine.addBall(ball);
         
-        physicsEngine.addCollisionObject(new Bumper(130.0, 180.0, 20.0));
-        physicsEngine.addCollisionObject(new Bumper(270.0, 180.0, 20.0, 0.92));
+        physicsEngine.addCollisionObject(new Bumper(130.0, 200.0, 15.0));
+        physicsEngine.addCollisionObject(new Bumper(200.0, 250.0, 15.0));
+        physicsEngine.addCollisionObject(new Bumper(270.0, 180.0, 15.0, 0.92));
 
         leftFlipper = new Flipper(105.0, 480.0, 60.0, 0.18, -0.85, 8.5, 0.95);
         rightFlipper = new Flipper(245.0, 480.0, 60.0, Math.PI - 0.18, Math.PI + 0.85, 8.5, 0.95);

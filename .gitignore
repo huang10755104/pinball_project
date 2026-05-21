@@ -10,6 +10,8 @@
 
 # VS Code
 /.vscode/
+/bin
+/lib
 
 # Eclipse
 /.classpath
