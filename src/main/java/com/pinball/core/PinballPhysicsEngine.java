@@ -239,16 +239,14 @@ public class PinballPhysicsEngine implements PhysicsEngine {
         double directionX = deltaX / travelDistance;
         double directionY = deltaY / travelDistance;
         double[] hitPoint = new double[2];
+
+        // 維持原本的中心點射線檢測
         double hitDistance = rayIntersectLine(
-                originX,
-                originY,
-                directionX,
-                directionY,
+                originX, originY,
+                directionX, directionY,
                 travelDistance,
-                wall.getStartX(),
-                wall.getStartY(),
-                wall.getEndX(),
-                wall.getEndY(),
+                wall.getStartX(), wall.getStartY(),
+                wall.getEndX(), wall.getEndY(),
                 hitPoint);
 
         if (hitDistance >= NO_HIT) {
@@ -261,30 +259,46 @@ public class PinballPhysicsEngine implements PhysicsEngine {
         if (normalLength == 0.0) {
             return;
         }
-
         normalX /= normalLength;
         normalY /= normalLength;
 
+        // 確保法向量朝向球的來向
+        double dx = originX - wall.getStartX();
+        double dy = originY - wall.getStartY();
+        if (dx * normalX + dy * normalY < 0) {
+            normalX = -normalX;
+            normalY = -normalY;
+        }
+
+        // 計算移動方向與法向量的內積 (夾角)
+        double dirDotNormal = directionX * normalX + directionY * normalY;
+        if (dirDotNormal >= 0.0) {
+            return; // 球正遠離牆壁
+        }
+
+        // 計算軌跡退回距離：將球半徑投影回移動軌跡上
+        double backUpDistance = ball.getRadius() / Math.abs(dirDotNormal);
+        double actualHitDistance = hitDistance - backUpDistance;
+
+        // 若小於 0 代表上一影格已經貼著牆
+        actualHitDistance = Math.max(0.0, actualHitDistance);
+
+        // 計算邊緣剛好碰到牆壁時的確切球心座標 (沿著原軌跡)
+        double collisionX = originX + directionX * actualHitDistance;
+        double collisionY = originY + directionY * actualHitDistance;
+
+        // 計算速度反彈
         double velocityX = ball.getVelocityX();
         double velocityY = ball.getVelocityY();
         double velocityDotNormal = velocityX * normalX + velocityY * normalY;
 
-        if (velocityDotNormal > 0.0) {
-            normalX = -normalX;
-            normalY = -normalY;
-            velocityDotNormal = -velocityDotNormal;
-        }
-
-        if (velocityDotNormal >= 0.0) {
-            return;
-        }
-
-        double elasticity = clamp(wall.getElasticity(), 0.0, 1.0);
+        double elasticity = clamp(wall.getBounciness(), 0.0, 1.0);
         double reflectedVelocityX = velocityX - (1.0 + elasticity) * velocityDotNormal * normalX;
         double reflectedVelocityY = velocityY - (1.0 + elasticity) * velocityDotNormal * normalY;
 
-        ball.setPositionX(hitPoint[0] + normalX * CONTACT_EPSILON);
-        ball.setPositionY(hitPoint[1] + normalY * CONTACT_EPSILON);
+        // 設定為修正後的座標，並加上極小法線偏移避免黏牆
+        ball.setPositionX(collisionX + normalX * CONTACT_EPSILON);
+        ball.setPositionY(collisionY + normalY * CONTACT_EPSILON);
         ball.setVelocityX(reflectedVelocityX);
         ball.setVelocityY(reflectedVelocityY);
     }

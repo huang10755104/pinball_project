@@ -91,8 +91,8 @@ public class PrimaryController {
         physicsEngine.addCollisionObject(new Bumper(130.0, 180.0, 20.0));
         physicsEngine.addCollisionObject(new Bumper(270.0, 180.0, 20.0, 0.92));
 
-        leftFlipper = new Flipper(100.0, 470.0, 60.0, -0.18, -0.95, 8.5, 0.95);
-        rightFlipper = new Flipper(250.0, 470.0, 60.0, Math.PI - 0.18, Math.PI + 0.95, 8.5, 0.95);
+        leftFlipper = new Flipper(105.0, 480.0, 60.0, 0.18, -0.85, 8.5, 0.95);
+        rightFlipper = new Flipper(245.0, 480.0, 60.0, Math.PI - 0.18, Math.PI + 0.85, 8.5, 0.95);
         physicsEngine.addCollisionObject(leftFlipper);
         physicsEngine.addCollisionObject(rightFlipper);
 
