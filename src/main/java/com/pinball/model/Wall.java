@@ -59,4 +59,15 @@ public class Wall extends GameObject {
     public void setEndY(double endY) {
         this.endY = endY;
     }
+    // 在 Wall.java 裡面加入反彈係數的屬性與 setter
+    private double bounciness = 0.4; // 預設反彈係數
+    
+    public void setBounciness(double bounciness) {
+        this.bounciness = bounciness; 
+    }
+
+    // 如果你的物理引擎還需要讀取它，順便補個 getter
+    public double getBounciness() {
+        return this.bounciness;
+    }
 }
