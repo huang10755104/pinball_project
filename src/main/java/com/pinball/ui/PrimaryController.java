@@ -9,6 +9,7 @@ import com.pinball.model.Flipper;
 
 import javafx.fxml.FXML;
 import javafx.application.Platform;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
@@ -16,7 +17,11 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 
 public class PrimaryController {
-    @FXML
+    @FXML // UI
+    private Label scoreLabel;
+    private int score = 0;
+    
+    @FXML // Main Game 
     private StackPane canvasContainer;
     private PinballCanvas pinballCanvas;
     private PinballPhysicsEngine physicsEngine;
@@ -34,6 +39,7 @@ public class PrimaryController {
     @FXML
     private void initialize() {
         physicsEngine = new PinballPhysicsEngine();
+        physicsEngine.setOnScoreAdded(this::addScore);
 
         // ================== V3 完美軌道版邊界 (一筆畫到底的連續外殼) ==================
         // 1. 遊戲主舞台外圍 + 發射通道外牆 (融合為單一連續牆壁)
@@ -224,5 +230,10 @@ public class PrimaryController {
             chargePower += 1000.0 * deltaTime; // 縮短蓄力時間
             chargePower = Math.min(chargePower, MAX_CHARGE); // 限制最大充能
         }
+    }
+
+    public void addScore(int points) {
+        score += points;
+        scoreLabel.setText("Score: " + score); 
     }
 }

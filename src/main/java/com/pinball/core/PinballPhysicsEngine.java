@@ -9,6 +9,7 @@ import com.pinball.model.Wall;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.IntConsumer;
 
 public class PinballPhysicsEngine implements PhysicsEngine {
     private static final double GRAVITY = 980.0;
@@ -18,6 +19,13 @@ public class PinballPhysicsEngine implements PhysicsEngine {
 
     private final List<Ball> balls = new ArrayList<>();
     private final List<GameObject> collisionObjects = new ArrayList<>();
+
+    private IntConsumer onScoreAdded; 
+
+    // 設定監聽器的方法
+    public void setOnScoreAdded(IntConsumer listener) {
+        this.onScoreAdded = listener;
+    }
 
     public List<Ball> getBalls() {
         return Collections.unmodifiableList(balls);
@@ -246,6 +254,9 @@ public class PinballPhysicsEngine implements PhysicsEngine {
         ball.setVelocityY(reflectedVelocityY);
         bumper.registerHit();
         sound.playBumper(0.3);
+        if (onScoreAdded != null) {
+            onScoreAdded.accept(bumper.getScoreValue()); 
+        }
     }
 
     private void resolveWallCollision(Ball ball, Wall wall) {
