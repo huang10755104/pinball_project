@@ -12,6 +12,9 @@ public class SoundManager {
         // 預載音效
         bumperSound = loadSound("/com/pinball/sounds/new_bumper.wav");
         flipperSound = loadSound("/com/pinball/sounds/flipper.mp3");
+
+        bumperSound.play(0);
+        flipperSound.play(0);
     }
 
     private AudioClip loadSound(String path) {
@@ -43,7 +46,13 @@ public class SoundManager {
 
     public void playFlipper() {
         if (flipperSound != null) {
-            flipperSound.play(1.0);
+            long currentTime = System.currentTimeMillis();
+            
+            if (currentTime - lastBounceTime > 50) {
+                flipperSound.play(0.35);
+                lastBounceTime = currentTime;
+            }
+            
         }
     }
 }

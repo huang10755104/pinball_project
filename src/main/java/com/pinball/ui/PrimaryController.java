@@ -2,6 +2,7 @@ package com.pinball.ui;
 
 import com.pinball.core.GameLoop;
 import com.pinball.core.PinballPhysicsEngine;
+import com.pinball.core.SoundManager;
 import com.pinball.model.Ball;
 import com.pinball.model.Bumper;
 import com.pinball.model.Wall;
@@ -41,6 +42,8 @@ public class PrimaryController {
 
     public Rectangle plungerBlock;
 
+    private static final SoundManager sound = new SoundManager();
+
     @FXML
     private void initialize() {
         startGame();
@@ -55,6 +58,7 @@ public class PrimaryController {
         gameOverOverlay.setVisible(false); // 隱藏結束畫面
 
         physicsEngine = new PinballPhysicsEngine();
+        physicsEngine.setSoundManager(sound);
         physicsEngine.setOnScoreAdded(this::addScore);
 
         // ================== V3 完美軌道版邊界 (一筆畫到底的連續外殼) ==================
@@ -132,8 +136,8 @@ public class PrimaryController {
         physicsEngine.addCollisionObject(new Bumper(200.0, 200.0, 15.0));
         physicsEngine.addCollisionObject(new Bumper(250.0, 130.0, 15.0, 0.92));
 
-        leftFlipper = new Flipper(110.0, 480.0, 60.0, 0.48, -0.85, 8.5, 0.95);
-        rightFlipper = new Flipper(240.0, 480.0, 60.0, Math.PI - 0.48, Math.PI + 0.85, 8.5, 0.95);
+        leftFlipper = new Flipper(110.0, 480.0, 60.0, 0.48, -0.85, 10.5, 0.95);
+        rightFlipper = new Flipper(240.0, 480.0, 60.0, Math.PI - 0.48, Math.PI + 0.85, 10.5, 0.95);
         physicsEngine.addCollisionObject(leftFlipper);
         physicsEngine.addCollisionObject(rightFlipper);
 
@@ -211,10 +215,16 @@ public class PrimaryController {
     @FXML
     private void handleKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.SHIFT || event.getCode() == KeyCode.LEFT) {
-            leftFlipper.extend();
+            if (!leftFlipper.isExtending()) {
+                leftFlipper.extend();
+                sound.playFlipper();
+            }
         }
         if (event.getCode() == KeyCode.SHIFT || event.getCode() == KeyCode.RIGHT) {
-            rightFlipper.extend();
+            if (!rightFlipper.isExtending()) {
+                rightFlipper.extend();
+                sound.playFlipper();
+            }
         }
         if (event.getCode() == KeyCode.SPACE) {
             isCharging = true;
@@ -262,7 +272,6 @@ public class PrimaryController {
 
     private void handleGameOver() {
         gameLoop.stop(); 
-        livesLabel.setText("GAME OVER");
         finalScoreLabel.setText("Final Score: " + score);
         gameOverOverlay.setVisible(true);
     }

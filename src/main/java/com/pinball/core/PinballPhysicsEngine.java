@@ -15,16 +15,20 @@ public class PinballPhysicsEngine implements PhysicsEngine {
     private static final double GRAVITY = 980.0;
     private static final double NO_HIT = 1_000_000_000.0;
     private static final double CONTACT_EPSILON = 0.0005;
-    private static final SoundManager sound = new SoundManager();
-
+    
     private final List<Ball> balls = new ArrayList<>();
     private final List<GameObject> collisionObjects = new ArrayList<>();
-
+    
+    private SoundManager sound;
     private IntConsumer onScoreAdded; 
 
     // 設定監聽器的方法
     public void setOnScoreAdded(IntConsumer listener) {
         this.onScoreAdded = listener;
+    }
+
+    public void setSoundManager(SoundManager sound) {
+        this.sound = sound;
     }
 
     public List<Ball> getBalls() {
