@@ -6,6 +6,7 @@ import com.pinball.core.SoundManager;
 import com.pinball.model.Ball;
 import com.pinball.model.Bumper;
 import com.pinball.model.Wall;
+import com.pinball.model.SpringWall;
 import com.pinball.model.Flipper;
 
 import javafx.fxml.FXML;
@@ -110,20 +111,24 @@ public class PrimaryController {
         
         
         // 9. 圓形彈簧旁的牆
+        // 左側
         physicsEngine.addCollisionObject(new Wall(320, 100, 330, 120));
         physicsEngine.addCollisionObject(new Wall(330, 120, 330, 140));
         physicsEngine.addCollisionObject(new Wall(330, 140, 300, 220));
-        Wall rightBumperWall = new Wall(300, 220, 260, 260);
+        physicsEngine.addCollisionObject(new Wall(260, 260, 250,270));
+        physicsEngine.addCollisionObject(new Wall(250, 270, 290, 250));
+        physicsEngine.addCollisionObject(new Wall(290, 250, 300, 220));
+        SpringWall rightBumperWall = new SpringWall(300, 220, 260, 260, 0.8);
         rightBumperWall.setBounciness(1.2);
         physicsEngine.addCollisionObject(rightBumperWall);
-
+        // 右側
         physicsEngine.addCollisionObject(new Wall(80, 140, 80, 220));
-        Wall leftBumperWall = new Wall(80, 220, 140, 240);
-        leftBumperWall.setBounciness(1.5);
-        physicsEngine.addCollisionObject(leftBumperWall);
         physicsEngine.addCollisionObject(new Wall(140, 240, 80, 260));
         physicsEngine.addCollisionObject(new Wall(80, 260, 50, 220));
         physicsEngine.addCollisionObject(new Wall(50, 220, 80, 140));
+        SpringWall leftBumperWall = new SpringWall(80, 220, 140, 240);
+        leftBumperWall.setBounciness(1.5);
+        physicsEngine.addCollisionObject(leftBumperWall);
         // =======================================================
 
         // 實例化台面動態物件
@@ -145,8 +150,8 @@ public class PrimaryController {
         pinballCanvas = new PinballCanvas(400, 550);
         pinballCanvas.setPhysicsEngine(physicsEngine);
         
-        plungerBlock = new Rectangle(30, 20, Color.web("#6c7086"));
-        plungerBlock.setTranslateX(165); // 相對畫布中心向右推
+        plungerBlock = new Rectangle(25, 20, Color.web("#6c7086"));
+        plungerBlock.setTranslateX(172.5); // 相對畫布中心向右推
         plungerBlock.setTranslateY(240); // 相對畫布中心向下推
         
         // 必須先加畫布，再加彈簧方塊，方塊才會在最上層

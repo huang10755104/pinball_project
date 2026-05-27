@@ -4,6 +4,7 @@ import com.pinball.model.Ball;
 import com.pinball.model.Bumper;
 import com.pinball.model.Flipper;
 import com.pinball.model.GameObject;
+import com.pinball.model.SpringWall;
 import com.pinball.model.Wall;
 
 import java.util.ArrayList;
@@ -315,9 +316,19 @@ public class PinballPhysicsEngine implements PhysicsEngine {
                 double velocityDotNormal = velocityX * normalX + velocityY * normalY;
 
                 if (velocityDotNormal < 0.0) {
-                    double elasticity = clamp(wall.getBounciness(), 0.0, 1.0);
-                    double reflectedVelocityX = velocityX - (1.0 + elasticity) * velocityDotNormal * normalX;
-                    double reflectedVelocityY = velocityY - (1.0 + elasticity) * velocityDotNormal * normalY;
+                    double reflectedVelocityX;
+                    double reflectedVelocityY;
+
+                    if (wall instanceof SpringWall springWall) {
+                        double influence = 0.1; // 僅保留 10% 原速度影響
+                        double kick = springWall.getKickForce();
+                        reflectedVelocityX = velocityX * influence + normalX * kick;
+                        reflectedVelocityY = velocityY * influence + normalY * kick;
+                    } else {
+                        double elasticity = clamp(wall.getBounciness(), 0.0, 1.0);
+                        reflectedVelocityX = velocityX - (1.0 + elasticity) * velocityDotNormal * normalX;
+                        reflectedVelocityY = velocityY - (1.0 + elasticity) * velocityDotNormal * normalY;
+                    }
 
                     double remainingDistance = Math.max(0.0, travelDistance - hitDistance);
 
@@ -373,9 +384,16 @@ public class PinballPhysicsEngine implements PhysicsEngine {
             double vDotN = velocityX * pushNormalX + velocityY * pushNormalY;
 
             if (vDotN < 0.0) {
-                double elasticity = clamp(wall.getBounciness(), 0.0, 1.0);
-                ball.setVelocityX(velocityX - (1.0 + elasticity) * vDotN * pushNormalX);
-                ball.setVelocityY(velocityY - (1.0 + elasticity) * vDotN * pushNormalY);
+                if (wall instanceof SpringWall springWall) {
+                    double influence = 0.1;
+                    double kick = springWall.getKickForce();
+                    ball.setVelocityX(velocityX * influence + pushNormalX * kick);
+                    ball.setVelocityY(velocityY * influence + pushNormalY * kick);
+                } else {
+                    double elasticity = clamp(wall.getBounciness(), 0.0, 1.0);
+                    ball.setVelocityX(velocityX - (1.0 + elasticity) * vDotN * pushNormalX);
+                    ball.setVelocityY(velocityY - (1.0 + elasticity) * vDotN * pushNormalY);
+                }
             }
         }
     }
