@@ -13,13 +13,18 @@ import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 
 public class PrimaryController {
-    @FXML // UI
-    private Label scoreLabel;
+    // UI
+    @FXML private Label scoreLabel;
+    @FXML private Label livesLabel;
+    @FXML private VBox gameOverOverlay;
+    @FXML private Label finalScoreLabel;
     private int score = 0;
+    private int lives = 3;
     
     @FXML // Main Game 
     private StackPane canvasContainer;
@@ -38,6 +43,17 @@ public class PrimaryController {
 
     @FXML
     private void initialize() {
+        startGame();
+    }
+
+    @FXML
+    private void startGame() { 
+        score = 0;
+        lives = 3;
+        scoreLabel.setText("Score: " + score);
+        livesLabel.setText("Balls: " + lives);
+        gameOverOverlay.setVisible(false); // 隱藏結束畫面
+
         physicsEngine = new PinballPhysicsEngine();
         physicsEngine.setOnScoreAdded(this::addScore);
 
@@ -172,12 +188,19 @@ public class PrimaryController {
                 }
 
                 // ================== 死球與異次元重生機制 ==================
+                
                 if (chuteBall != null) {
                     if (chuteBall.getPositionY() > 600 || chuteBall.getPositionY() < -100 || chuteBall.getPositionX() < -50 || chuteBall.getPositionX() > 450) {
                         chuteBall.setPositionX(365.0); 
                         chuteBall.setPositionY(500.0);
                         chuteBall.setVelocityX(0);
                         chuteBall.setVelocityY(0);
+
+                        lives--;
+                        livesLabel.setText("Balls: " + lives);
+                        if (lives == 0) {
+                            handleGameOver();
+                        }
                     }
                 }
             }
@@ -235,5 +258,17 @@ public class PrimaryController {
     public void addScore(int points) {
         score += points;
         scoreLabel.setText("Score: " + score); 
+    }
+
+    private void handleGameOver() {
+        gameLoop.stop(); 
+        livesLabel.setText("GAME OVER");
+        finalScoreLabel.setText("Final Score: " + score);
+        gameOverOverlay.setVisible(true);
+    }
+
+    @FXML
+    private void restartGame() {
+        startGame(); // 重新呼叫初始化方法
     }
 }

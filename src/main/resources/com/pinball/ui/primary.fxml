@@ -5,17 +5,26 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
+<?import javafx.geometry.Pos?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pinball.ui.PrimaryController" style="-fx-background-color: #1e1e2e;">
-    
-    <center>
-        <StackPane fx:id="canvasContainer" />
-    </center>
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pinball.ui.PrimaryController">
 
-    <right>
-        <VBox prefWidth="200" spacing="15" style="-fx-background-color: #313244; -fx-padding: 20;">
-            <Label fx:id="scoreLabel" text="Score: 0" textFill="WHITE" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
-        </VBox>
-    </right>
+    <BorderPane style="-fx-background-color: #1e1e2e;">
+        <center>
+            <StackPane fx:id="canvasContainer" />
+        </center>
+        <right>
+            <VBox prefWidth="200" spacing="15" style="-fx-background-color: #313244; -fx-padding: 20;">
+                <Label fx:id="scoreLabel" text="Score: 0" textFill="WHITE" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+                <Label fx:id="livesLabel" text="Balls: 3" textFill="LIGHTCORAL" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+            </VBox>
+        </right>
+    </BorderPane>
 
-</BorderPane>
+    <VBox fx:id="gameOverOverlay" alignment="CENTER" spacing="20" visible="false" style="-fx-background-color: rgba(0, 0, 0, 0.75);">
+        <Label text="GAME OVER" textFill="RED" style="-fx-font-size: 64px; -fx-font-weight: bold;" />
+        <Label fx:id="finalScoreLabel" text="Final Score: 0" textFill="WHITE" style="-fx-font-size: 32px;" />
+        <Button text="PLAY AGAIN" onAction="#restartGame" style="-fx-font-size: 20px; -fx-padding: 10 30;" />
+    </VBox>
+
+</StackPane>
