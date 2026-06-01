@@ -23,10 +23,10 @@ public class Wall extends GameObject {
 
     @Override
     public void draw(javafx.scene.canvas.GraphicsContext gc) {
-        gc.setStroke(javafx.scene.paint.Color.AQUA);
+        gc.setStroke(javafx.scene.paint.Color.web("#30b5c7"));
         gc.setLineWidth(4.0);
         gc.strokeLine(startX, startY, endX, endY);
-        gc.setFill(javafx.scene.paint.Color.AQUA);
+        gc.setFill(javafx.scene.paint.Color.web("#30b5c7"));
         gc.fillOval(startX - 2, startY - 2, 4, 4);
         gc.fillOval(endX - 2, endY - 2, 4, 4);
     }

@@ -163,9 +163,6 @@ public class PrimaryController {
         physicsEngine.addBall(ball);
 
 
-        physicsEngine.addCollisionObject(new Bumper(BUMPER_POSITIONS[4][0], BUMPER_POSITIONS[4][1], 15.0));
-
-
         // initialize bumper position
         activeBumpers[0] = new Bumper(BUMPER_POSITIONS[0][0], BUMPER_POSITIONS[0][1], 15.0);
         activeBumpers[1] = new Bumper(BUMPER_POSITIONS[1][0], BUMPER_POSITIONS[1][1], 15.0);
