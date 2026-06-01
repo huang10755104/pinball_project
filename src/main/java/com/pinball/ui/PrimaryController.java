@@ -117,7 +117,7 @@ public class PrimaryController {
 
             // 依序加入四種 Bumper 的顏色與得分標記（對應你 rollBumperType 的設定）
             bumpersCard.getChildren().add(createBumperTypeRow("Diamond ", "+2000", "#39afc4"));
-            bumpersCard.getChildren().add(createBumperTypeRow("Gold ", "+500", "#ffd700"));
+            bumpersCard.getChildren().add(createBumperTypeRow("Gold ", "+600", "#ffd700"));
             bumpersCard.getChildren().add(createBumperTypeRow("Silver ", "+300", "#c0c0c0"));
             bumpersCard.getChildren().add(createBumperTypeRow("Bronze ", "+100", "#782323"));
 
@@ -483,14 +483,14 @@ public class PrimaryController {
     private void rollBumperType(Bumper bumper) {
         double rand = Math.random();
         // diamond bumper :  3%   2000score
-        // gold bumper    : 10%    500score
+        // gold bumper    : 10%    600score
         // silver bumper  : 25%    300score
         // bronze bumper  : 62%    100score
         if (rand < 0.03) {
             bumper.setBumperType("Diamond", Color.web("#39afc4"), 2000);
         } else if (rand < 0.13) {
-            bumper.setBumperType("Gold", Color.web("#ffd700"), 500);
-        } else if (rand < 0.38) {
+            bumper.setBumperType("Gold", Color.web("#ffd700"), 600);
+        } else if (rand < 0.25) {
             bumper.setBumperType("Silver", Color.web("#c0c0c0"), 300);
         } else {
             bumper.setBumperType("Bronze", Color.web("#782323"), 100);
