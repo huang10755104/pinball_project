@@ -52,48 +52,68 @@ public class PrimaryController {
 
     @FXML
     private void initialize() {
-        // adding score
+        // 分數標籤樣式
         scoreLabel.setStyle(
                 "-fx-font-family: 'Consolas', 'Monospaced';" +
-                        "-fx-font-size: 20px;" +
+                        "-fx-font-size: 24px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-text-fill: #00f0ff;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(0,240,255,0.4), 8, 0, 0, 0);"
         );
 
+        // 生命值標籤樣式
         livesLabel.setStyle(
-                "-fx-font-size: 16px;" +
-                        "-fx-text-fill: #ff5555;" +
+                "-fx-font-size: 22px;" +
+                        "-fx-text-fill: #4fc742;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);"
         );
-
 
         if (scoreLabel.getParent() instanceof VBox) {
             VBox rightPanel = (VBox) scoreLabel.getParent();
 
             rightPanel.setStyle("-fx-background-color: #0d1117; -fx-padding: 25; -fx-alignment: TOP_CENTER;");
-            rightPanel.setSpacing(25);
+            rightPanel.setSpacing(20); // 稍微縮減間距，確保所有卡片都放得下
 
             // PINBALL GAME title
             VBox titleBox = new VBox(2);
             titleBox.setAlignment(javafx.geometry.Pos.CENTER);
 
             Label pLabel = new Label("PINBALL");
-            pLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: 900; -fx-text-fill: #ff007f; -fx-effect: dropshadow(three-pass-box, rgba(255,0,127,0.5), 10, 0, 0, 0);");
+            pLabel.setStyle("-fx-font-family: 'Consolas', 'Monospaced'; -fx-font-size: 36px; -fx-font-weight: 900; -fx-text-fill: #ff007f; -fx-effect: dropshadow(three-pass-box, rgba(255,0,127,0.5), 10, 0, 0, 0);");
 
             Label gLabel = new Label("GAME");
-            gLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: #00f0ff; -fx-effect: dropshadow(three-pass-box, rgba(0,240,255,0.5), 10, 0, 0, 0);");
+            gLabel.setStyle("-fx-font-family: 'Consolas', 'Monospaced'; -fx-font-size: 32px; -fx-font-weight: 900; -fx-text-fill: #00f0ff; -fx-effect: dropshadow(three-pass-box, rgba(0,240,255,0.5), 10, 0, 0, 0);");
 
             titleBox.getChildren().addAll(pLabel, gLabel);
 
-            // create control hints
+            VBox bumpersCard = new VBox(8);
+            bumpersCard.setStyle(
+                    "-fx-background-color: #181825;" +    // 稍有區隔的深色背景
+                            "-fx-background-radius: 8;" +
+                            "-fx-border-color: #45475a;" +
+                            "-fx-border-radius: 8;" +
+                            "-fx-padding: 12;" +
+                            "-fx-fill-width: true;"
+            );
+
+            Label bumperTitle = new Label("BUMPER TYPES 🎯");
+            bumperTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #cba6f7;");
+            bumpersCard.getChildren().add(bumperTitle);
+
+            // 依序加入四種 Bumper 的顏色與得分標記（對應隊友的設定）
+            bumpersCard.getChildren().add(createBumperTypeRow("Diamond ", "+2000", "#39afc4"));
+            bumpersCard.getChildren().add(createBumperTypeRow("Gold ", "+500", "#ffd700"));
+            bumpersCard.getChildren().add(createBumperTypeRow("Silver ", "+300", "#c0c0c0"));
+            bumpersCard.getChildren().add(createBumperTypeRow("Bronze ", "+100", "#782323"));
+
+
             VBox hintsCard = new VBox(10);
             hintsCard.setStyle(
                     "-fx-background-color: #1e1e2e;" +
                             "-fx-background-radius: 8;" +
                             "-fx-border-color: #313244;" +
                             "-fx-border-radius: 8;" +
-                            "-fx-padding: 15;" +
+                            "-fx-padding: 12;" +
                             "-fx-fill-width: true;"
             );
 
@@ -101,19 +121,19 @@ public class PrimaryController {
             cardTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #f5c2e7;");
             hintsCard.getChildren().add(cardTitle);
 
-            // add hint
             hintsCard.getChildren().add(createHintRow("發射球：", "長按 SPACE", "#89b4fa"));
             hintsCard.getChildren().add(createHintRow("左撥片：", "◀ 左方向鍵 ", "#74c7ec"));
             hintsCard.getChildren().add(createHintRow("右撥片：", "右方向鍵 ▶", "#74c7ec"));
 
+            // 清空舊 UI 元件
             rightPanel.getChildren().clear();
 
-            // push control hint down
+            // 建立彈性墊片，負責把 Controls 卡片推到最底部
             Region spacer = new Region();
             VBox.setVgrow(spacer, Priority.ALWAYS);
 
-            // sort
-            rightPanel.getChildren().addAll(titleBox, scoreLabel, livesLabel, spacer, hintsCard);
+            // 大標題 -> 分數 -> 生命值 -> Bumper指引 -> 彈性墊片 -> 操作指引
+            rightPanel.getChildren().addAll(titleBox, scoreLabel, livesLabel, bumpersCard, spacer, hintsCard);
         }
 
         // 啟動遊戲
@@ -134,6 +154,24 @@ public class PrimaryController {
         key.setStyle("-fx-text-fill: " + keyColor + "; -fx-font-weight: bold; -fx-font-size: 12px;");
 
         row.getChildren().addAll(lbl, innerSpacer, key);
+        return row;
+    }
+
+    private HBox createBumperTypeRow(String typeName, String scoreText, String hexColor) {
+        HBox row = new HBox();
+        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        Label nameLbl = new Label(typeName);
+        nameLbl.setStyle("-fx-text-fill: " + hexColor + "; -fx-font-weight: bold; -fx-font-size: 12px;");
+
+        // 中間墊片自動推開
+        Region innerSpacer = new Region();
+        HBox.setHgrow(innerSpacer, Priority.ALWAYS);
+
+        Label scoreLbl = new Label(scoreText);
+        scoreLbl.setStyle("-fx-text-fill: #a6adc8; -fx-font-family: 'Consolas', 'Monospaced'; -fx-font-size: 12px;");
+
+        row.getChildren().addAll(nameLbl, innerSpacer, scoreLbl);
         return row;
     }
 
@@ -164,10 +202,9 @@ public class PrimaryController {
         }
         dynamicGateWall = tableGeometry.getDynamicGateWall();
         physicsEngine.configureBumperRespawn(
-                tableGeometry.getBumpers(),
-                tableGeometry.getBumperPositions(),
-                tableGeometry.getBumperPositionIndices());
-
+        tableGeometry.getBumpers().toArray(new com.pinball.model.Bumper[0]),
+        tableGeometry.getBumperPositions(),
+        tableGeometry.getBumperPositionIndices());
         // 實例化台面動態物件
         Ball ball = new Ball(373.0, 500.0, 8.0);
         ball.setVelocityX(0.0);
@@ -219,7 +256,6 @@ public class PrimaryController {
                             dynamicGateWall.setActive(true);
                         }
                     }
-
                 }
 
                 if (isCharging) {
@@ -253,8 +289,9 @@ public class PrimaryController {
                         chuteBall.setVelocityY(0);
 
                         lives--;
-
-                        livesLabel.setText("Balls: "+ lives);
+                        if (lives == 2) livesLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: #c7c742; -fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);");
+                        else if (lives == 1) livesLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: #ba0909; -fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);");
+                        livesLabel.setText("Balls: " + lives);
 
                         if (lives == 0) {
                             handleGameOver();
@@ -322,7 +359,6 @@ public class PrimaryController {
     public void addScore(int points) {
         score += points;
         scoreLabel.setText("Score: " + score);
-
     }
 
     private void handleGameOver() {
