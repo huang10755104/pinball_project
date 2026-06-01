@@ -490,7 +490,7 @@ public class PrimaryController {
             bumper.setBumperType("Diamond", Color.web("#39afc4"), 2000);
         } else if (rand < 0.13) {
             bumper.setBumperType("Gold", Color.web("#ffd700"), 600);
-        } else if (rand < 0.25) {
+        } else if (rand < 0.38) {
             bumper.setBumperType("Silver", Color.web("#c0c0c0"), 300);
         } else {
             bumper.setBumperType("Bronze", Color.web("#782323"), 100);
