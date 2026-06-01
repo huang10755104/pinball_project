@@ -35,7 +35,7 @@ public class PrimaryController {
     private Flipper leftFlipper;
     private Flipper rightFlipper;
 
-    // 🌟 核心新增：動態防落閘門變數與狀態標記
+    // dynamic wall
     private Wall dynamicGateWall = null;
     private boolean isGateClosed = false;
     // 蓄力發射變數
@@ -46,6 +46,22 @@ public class PrimaryController {
     public Rectangle plungerBlock;
 
     private static final SoundManager sound = new SoundManager();
+
+    // bumper random positions
+    private final double[][] BUMPER_POSITIONS = {
+            {120.0, 150.0},
+            {200.0, 250.0},
+            {280.0, 150.0},
+            {30.0, 180.0},
+            {320.0, 250.0},
+            {120.0, 360.0},
+            {230.0, 360.0},
+            {200.0, 70.0},
+            {65.0, 290.0},
+            {290.0, 290.0}
+    };
+    // saving bumper locations
+    private final Bumper[] activeBumpers = new Bumper[3];
 
     @FXML
     private void initialize() {
@@ -146,9 +162,18 @@ public class PrimaryController {
         ball.setVelocityY(0.0);
         physicsEngine.addBall(ball);
 
-        physicsEngine.addCollisionObject(new Bumper(150.0, 150.0, 15.0));
-        physicsEngine.addCollisionObject(new Bumper(200.0, 200.0, 15.0));
-        physicsEngine.addCollisionObject(new Bumper(250.0, 130.0, 15.0, 0.92));
+
+        physicsEngine.addCollisionObject(new Bumper(BUMPER_POSITIONS[4][0], BUMPER_POSITIONS[4][1], 15.0));
+
+
+        // initialize bumper position
+        activeBumpers[0] = new Bumper(BUMPER_POSITIONS[0][0], BUMPER_POSITIONS[0][1], 15.0);
+        activeBumpers[1] = new Bumper(BUMPER_POSITIONS[1][0], BUMPER_POSITIONS[1][1], 15.0);
+        activeBumpers[2] = new Bumper(BUMPER_POSITIONS[2][0], BUMPER_POSITIONS[2][1], 15.0);
+        // save bumper positions
+        physicsEngine.addCollisionObject(activeBumpers[0]);
+        physicsEngine.addCollisionObject(activeBumpers[1]);
+        physicsEngine.addCollisionObject(activeBumpers[2]);
 
         leftFlipper = new Flipper(110.0, 480.0, 60.0, 0.48, -0.85, 10.5, 0.95);
         rightFlipper = new Flipper(240.0, 480.0, 60.0, Math.PI - 0.48, Math.PI + 0.85, 10.5, 0.95);
@@ -190,7 +215,43 @@ public class PrimaryController {
                             dynamicGateWall.setActive(true);
                         }
                     }
+                    for (int i = 0; i < activeBumpers.length; i++) {
+                        Bumper bumper = activeBumpers[i];
+                        // 計算彈珠中心點與 Bumper 中心點的幾何距離
+                        double dx = chuteBall.getPositionX() - bumper.getCenterX();
+                        double dy = chuteBall.getPositionY() - bumper.getCenterY();
+                        double distance = Math.hypot(dx, dy);
+                        // checking collision
+                        if (distance < 24.5) {
+                            // choosing new spot
+                            int randomIndex = (int) (Math.random() * BUMPER_POSITIONS.length);
+                            double newX = BUMPER_POSITIONS[randomIndex][0];
+                            double newY = BUMPER_POSITIONS[randomIndex][1];
+                            // checking if the new spot is too close to the other bumpers
+                            boolean isOverlapping = false;
+                            for (int j = 0; j < activeBumpers.length; j++) {
+                                if (i != j) {
+                                    double bx = newX - activeBumpers[j].getCenterX();
+                                    double by = newY - activeBumpers[j].getCenterY();
+                                    if (Math.hypot(bx, by) < 40.0) {
+                                        isOverlapping = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            // 如果新位置很安全，就讓被撞到的 Bumper 瞬間移動過去！
+                            if (!isOverlapping) {
+                                bumper.setCenterX(newX);
+                                bumper.setCenterY(newY);
+                                // 震動球一下防止黏在一起連續觸發
+                                chuteBall.setPositionX(chuteBall.getPositionX() + chuteBall.getVelocityX() * 0.016);
+                                chuteBall.setPositionY(chuteBall.getPositionY() + chuteBall.getVelocityY() * 0.016);
+                            }
+                        }
+                    }
                 }
+
+
 
                 if (isCharging) {
                     double visualOffset = chargePower * 0.04;
