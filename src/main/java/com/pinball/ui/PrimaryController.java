@@ -448,13 +448,13 @@ public class PrimaryController {
         // silver bumper  : 25%    300score
         // bronze bumper  : 72%    100score
         if (rand < 0.03) {
-            bumper.setBumperType("Diamond", Color.web("#b9f2ff"), 1000);
+            bumper.setBumperType("Diamond", Color.web("#b9f2ff"), 2000);
         } else if (rand < 0.13) {
-            bumper.setBumperType("Gold", Color.web("#ffd700"), 250);
+            bumper.setBumperType("Gold", Color.web("#ffd700"), 500);
         } else if (rand < 0.38) {
-            bumper.setBumperType("Silver", Color.web("#c0c0c0"), 150);
+            bumper.setBumperType("Silver", Color.web("#c0c0c0"), 300);
         } else {
-            bumper.setBumperType("Bronze", Color.web("#782323"), 50);
+            bumper.setBumperType("Bronze", Color.web("#782323"), 100);
         }
     }
     public void addScore(int points) {
