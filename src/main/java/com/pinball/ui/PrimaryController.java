@@ -164,7 +164,6 @@ public class PrimaryController {
 
         physicsEngine = new PinballPhysicsEngine();
         physicsEngine.setSoundManager(sound);
-        physicsEngine.setOnScoreAdded(this::addScore);
 
         double leftWallX = 5.0;
         double rightOuterWallX = 385.0;
@@ -302,7 +301,18 @@ public class PrimaryController {
                         double distance = Math.hypot(dx, dy);
                         // checking collision
                         if (distance < 24.5) {
-                            // choosing new spot
+                            addScore(1000);
+                            if (distance > 0) {
+                                double nx = dx / distance; // 碰撞法向量 X
+                                double ny = dy / distance; // 碰撞法向量 Y
+                                // 計算球原本的速度大小 (Speed)
+                                double currentSpeed = Math.hypot(chuteBall.getVelocityX(), chuteBall.getVelocityY());
+                                // 給予一個基礎反彈噴射速度（確保即便是慢速滾入，也會被強力彈開）
+                                double bounceSpeed = Math.max(currentSpeed * 1.2, 400.0);
+                                // 設定新速度方向：沿著碰撞中心點向外散射
+                                chuteBall.setVelocityX(nx * bounceSpeed);
+                                chuteBall.setVelocityY(ny * bounceSpeed);
+                            }
                             int randomIndex = (int) (Math.random() * BUMPER_POSITIONS.length);
                             double newX = BUMPER_POSITIONS[randomIndex][0];
                             double newY = BUMPER_POSITIONS[randomIndex][1];
@@ -318,18 +328,16 @@ public class PrimaryController {
                                     }
                                 }
                             }
-                            // 如果新位置很安全，就讓被撞到的 Bumper 瞬間移動過去！
                             if (!isOverlapping) {
                                 bumper.setCenterX(newX);
                                 bumper.setCenterY(newY);
-                                // 震動球一下防止黏在一起連續觸發
                                 chuteBall.setPositionX(chuteBall.getPositionX() + chuteBall.getVelocityX() * 0.016);
                                 chuteBall.setPositionY(chuteBall.getPositionY() + chuteBall.getVelocityY() * 0.016);
                             }
+
                         }
                     }
                 }
-
 
 
                 if (isCharging) {
@@ -357,7 +365,7 @@ public class PrimaryController {
                         }
 
                         chuteBall.setPositionX(373.0);
-                        chuteBall.setPositionY(500.0);
+                        chuteBall.setPositionY(480.0);
                         chuteBall.setVelocityX(0);
                         chuteBall.setVelocityY(0);
 
