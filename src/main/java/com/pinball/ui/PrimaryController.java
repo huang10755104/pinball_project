@@ -312,34 +312,38 @@ public class PrimaryController {
 
                         if (distance < 24.5) {
                             addScore(bumper.getScoreValue());
+                            int randomIndex;
+                            boolean isOccupied;
 
-                            if (distance > 0) {
-                                double nx = dx / distance;
-                                double ny = dy / distance;
-                                double currentSpeed = Math.hypot(chuteBall.getVelocityX(), chuteBall.getVelocityY());
-                                double bounceSpeed = Math.max(currentSpeed * 1.2, 400.0);
-
-                                chuteBall.setVelocityX(nx * bounceSpeed);
-                                chuteBall.setVelocityY(ny * bounceSpeed);
-                            }
-
-                            int randomIndex = (int) (Math.random() * BUMPER_POSITIONS.length);
-                            while (Arrays.asList(activeBumpersIndex).contains(randomIndex)) {
+                            do {
                                 randomIndex = (int) (Math.random() * BUMPER_POSITIONS.length);
-                            }
+                                isOccupied = false;
 
+                                // 用最保險的迴圈檢查這個 index 有沒有被其他 activeBumper 佔用
+                                for (int idx : activeBumpersIndex) {
+                                    if (idx == randomIndex) {
+                                        isOccupied = true;
+                                        break;
+                                    }
+                                }
+                            } while (isOccupied); // 如果被佔用了，就重新抽籤
+
+                            // 抽到安全位置後，立刻更新索引陣列
                             activeBumpersIndex[i] = randomIndex;
 
                             double newX = BUMPER_POSITIONS[randomIndex][0];
                             double newY = BUMPER_POSITIONS[randomIndex][1];
 
+                            // 瞬移 Bumper
                             bumper.setCenterX(newX);
                             bumper.setCenterY(newY);
 
+                            // 刷新 Bumper 稀有度
                             rollBumperType(bumper);
 
-                            chuteBall.setPositionX(chuteBall.getPositionX() + chuteBall.getVelocityX() * 0.016);
-                            chuteBall.setPositionY(chuteBall.getPositionY() + chuteBall.getVelocityY() * 0.016);
+                            // 🌟【關鍵優化】：計算反彈後，將球往前多推進一些（乘上 0.032 秒以上），確保它這幀絕對遠離 Bumper 中心點，避免連續觸發二次碰撞
+                            chuteBall.setPositionX(chuteBall.getPositionX() + chuteBall.getVelocityX() * 0.032);
+                            chuteBall.setPositionY(chuteBall.getPositionY() + chuteBall.getVelocityY() * 0.032);
                         }
                     }
                 }
@@ -446,9 +450,9 @@ public class PrimaryController {
         // diamond bumper :  3%   2000score
         // gold bumper    : 10%    500score
         // silver bumper  : 25%    300score
-        // bronze bumper  : 72%    100score
+        // bronze bumper  : 62%    100score
         if (rand < 0.03) {
-            bumper.setBumperType("Diamond", Color.web("#b9f2ff"), 2000);
+            bumper.setBumperType("Diamond", Color.web("#39afc4"), 2000);
         } else if (rand < 0.13) {
             bumper.setBumperType("Gold", Color.web("#ffd700"), 500);
         } else if (rand < 0.38) {
