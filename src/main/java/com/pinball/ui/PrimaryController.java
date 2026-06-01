@@ -17,6 +17,8 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 
+import java.util.Arrays;
+
 public class PrimaryController {
     // UI
     @FXML private Label scoreLabel;
@@ -61,10 +63,10 @@ public class PrimaryController {
     };
     // saving bumper locations
     private final Bumper[] activeBumpers = new Bumper[3];
-
+    private final Integer[] activeBumpersIndex = {0,1,2};
     @FXML
     private void initialize() {
-        // 幫分數加上字型大小與霓虹青藍（#00f0ff）的發光效果 (dropshadow)
+        // adding score
         scoreLabel.setStyle(
                 "-fx-font-family: 'Consolas', 'Monospaced';" +
                         "-fx-font-size: 24px;" +
@@ -101,9 +103,9 @@ public class PrimaryController {
             // create control hints
             VBox hintsCard = new VBox(10);
             hintsCard.setStyle(
-                    "-fx-background-color: #1e1e2e;" +     // 獨立深色卡片背景
+                    "-fx-background-color: #1e1e2e;" +
                             "-fx-background-radius: 8;" +
-                            "-fx-border-color: #313244;" +          // 卡片細暗框
+                            "-fx-border-color: #313244;" +
                             "-fx-border-radius: 8;" +
                             "-fx-padding: 15;" +
                             "-fx-fill-width: true;"
@@ -113,19 +115,18 @@ public class PrimaryController {
             cardTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #f5c2e7;");
             hintsCard.getChildren().add(cardTitle);
 
-            // 加入三行快捷鍵提示
+            // add hint
             hintsCard.getChildren().add(createHintRow("發射球：", "長按 SPACE", "#89b4fa"));
             hintsCard.getChildren().add(createHintRow("左撥片：", "◀ 左方向鍵 ", "#74c7ec"));
             hintsCard.getChildren().add(createHintRow("右撥片：", "右方向鍵 ▶", "#74c7ec"));
 
-            // 🌟 5. 重新調整右側面板的排列順序，讓標題在最上面、卡片在最下面
             rightPanel.getChildren().clear();
 
-            // 建立一個彈性墊片，自動把操作卡片推到最右下角
+            // push control hint down
             Region spacer = new Region();
             VBox.setVgrow(spacer, Priority.ALWAYS);
 
-            // 依序排列：大標題 -> 分數標籤 -> 生命值標籤 -> 彈性墊片 -> 操作卡片
+            // sort
             rightPanel.getChildren().addAll(titleBox, scoreLabel, livesLabel, spacer, hintsCard);
         }
 
@@ -154,7 +155,7 @@ public class PrimaryController {
     private void startGame() {
         score = 0;
         lives = 3;
-        scoreLabel.setText("000000");
+        scoreLabel.setText("Score: " + score);
         livesLabel.setText("Balls: " + lives);
         gameOverOverlay.setVisible(false);
 
@@ -295,7 +296,7 @@ public class PrimaryController {
                     }
                     for (int i = 0; i < activeBumpers.length; i++) {
                         Bumper bumper = activeBumpers[i];
-                        // 計算彈珠中心點與 Bumper 中心點的幾何距離
+                        // counting distance
                         double dx = chuteBall.getPositionX() - bumper.getCenterX();
                         double dy = chuteBall.getPositionY() - bumper.getCenterY();
                         double distance = Math.hypot(dx, dy);
@@ -314,26 +315,18 @@ public class PrimaryController {
                                 chuteBall.setVelocityY(ny * bounceSpeed);
                             }
                             int randomIndex = (int) (Math.random() * BUMPER_POSITIONS.length);
+                            while (Arrays.asList(activeBumpersIndex).contains(randomIndex)){
+                                randomIndex = (int) (Math.random() * BUMPER_POSITIONS.length);
+                            }
+
                             double newX = BUMPER_POSITIONS[randomIndex][0];
                             double newY = BUMPER_POSITIONS[randomIndex][1];
-                            // checking if the new spot is too close to the other bumpers
-                            boolean isOverlapping = false;
-                            for (int j = 0; j < activeBumpers.length; j++) {
-                                if (i != j) {
-                                    double bx = newX - activeBumpers[j].getCenterX();
-                                    double by = newY - activeBumpers[j].getCenterY();
-                                    if (Math.hypot(bx, by) < 40.0) {
-                                        isOverlapping = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (!isOverlapping) {
-                                bumper.setCenterX(newX);
-                                bumper.setCenterY(newY);
-                                chuteBall.setPositionX(chuteBall.getPositionX() + chuteBall.getVelocityX() * 0.016);
-                                chuteBall.setPositionY(chuteBall.getPositionY() + chuteBall.getVelocityY() * 0.016);
-                            }
+
+                            bumper.setCenterX(newX);
+                            bumper.setCenterY(newY);
+                            chuteBall.setPositionX(chuteBall.getPositionX() + chuteBall.getVelocityX() * 0.016);
+                            chuteBall.setPositionY(chuteBall.getPositionY() + chuteBall.getVelocityY() * 0.016);
+
 
                         }
                     }
@@ -436,7 +429,7 @@ public class PrimaryController {
 
     public void addScore(int points) {
         score += points;
-        scoreLabel.setText(String.format("%06d", score));
+        scoreLabel.setText("Score: " + score);
 
     }
 
