@@ -3,11 +3,11 @@ package com.pinball.ui;
 import com.pinball.core.GameLoop;
 import com.pinball.core.PinballPhysicsEngine;
 import com.pinball.core.SoundManager;
+import com.pinball.core.TableBuilder;
 import com.pinball.model.Ball;
-import com.pinball.model.Bumper;
-import com.pinball.model.Wall;
-import com.pinball.model.SpringWall;
 import com.pinball.model.Flipper;
+import com.pinball.model.GameObject;
+import com.pinball.model.Wall;
 
 import javafx.fxml.FXML;
 import javafx.application.Platform;
@@ -18,7 +18,6 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 
-import java.util.Arrays;
 
 public class PrimaryController {
     // UI
@@ -44,27 +43,13 @@ public class PrimaryController {
     private double chargePower = 0;
     private boolean isCharging = false;
     private final double MAX_CHARGE = 1400.0; // 宇宙級推力，保證衝破屋頂
+    private static final double CANVAS_WIDTH = 400.0;
+    private static final double CANVAS_HEIGHT = 550.0;
 
     public Rectangle plungerBlock;
 
     private static final SoundManager sound = new SoundManager();
 
-    // bumper random positions
-    private final double[][] BUMPER_POSITIONS = {
-            {120.0, 150.0},
-            {200.0, 250.0},
-            {280.0, 150.0},
-            {30.0, 180.0},
-            {320.0, 250.0},
-            {120.0, 360.0},
-            {230.0, 360.0},
-            {200.0, 70.0},
-            {65.0, 290.0},
-            {290.0, 290.0}
-    };
-    // saving bumper locations
-    private final Bumper[] activeBumpers = new Bumper[3];
-    private final Integer[] activeBumpersIndex = {0,1,2};
     @FXML
     private void initialize() {
         // adding score
@@ -166,83 +151,22 @@ public class PrimaryController {
 
         physicsEngine = new PinballPhysicsEngine();
         physicsEngine.setSoundManager(sound);
+        physicsEngine.setOnScoreAdded(this::addScore);
 
-        double leftWallX = 5.0;
-        double rightOuterWallX = 385.0;
-
-        double playableWidth = rightOuterWallX - leftWallX; // 380
-        double centerX = leftWallX + (playableWidth / 2.0); // 195.0
-
-        double startY = 150.0;
-        double radiusX = playableWidth / 2.0;     // 190.0
-        double radiusY = 140.0;                   // 圓潤拱頂
-
-        int segments = 50;
-        double lastX = leftWallX;
-        double lastY = startY;
-
-        for (int i = 1; i <= segments; i++) {
-            double angleRad = Math.toRadians(180.0 - (180.0 / segments) * i);
-            double nextX = centerX + radiusX * Math.cos(angleRad);
-            double nextY = startY - radiusY * Math.sin(angleRad);
-            physicsEngine.addCollisionObject(new Wall(lastX, lastY, nextX, nextY));
-
-            lastX = nextX;
-            lastY = nextY;
+        TableBuilder tableBuilder = new TableBuilder(CANVAS_WIDTH, CANVAS_HEIGHT);
+        for (Wall wall : tableBuilder.buildBoundaryWalls()) {
+            physicsEngine.addCollisionObject(wall);
         }
 
-        // 基礎外牆結構
-        physicsEngine.addCollisionObject(new Wall(5.0, 150.0, 5.0, 432.0));     // 左側外牆
-        physicsEngine.addCollisionObject(new Wall(385.0, 150.0, 385.0, 550.0));  // 右側最外牆
-        physicsEngine.addCollisionObject(new Wall(345.0, 150.0, 345.0, 432.0));  // 通道固定內牆
-
-        // 內外球道分隔島
-        physicsEngine.addCollisionObject(new Wall(30, 320, 30, 380));
-        physicsEngine.addCollisionObject(new Wall(320, 320, 320, 380));
-
-        // 左側三角彈弓
-        physicsEngine.addCollisionObject(new Wall(85, 330, 60, 400));
-        physicsEngine.addCollisionObject(new Wall(60, 400, 95, 430));
-        Wall leftSlingshot = new Wall(95, 430, 85, 330);
-        leftSlingshot.setBounciness(1.2);
-        physicsEngine.addCollisionObject(leftSlingshot);
-
-        // 右側三角彈弓
-        physicsEngine.addCollisionObject(new Wall(265, 330, 290, 400));
-        physicsEngine.addCollisionObject(new Wall(290, 400, 255, 430));
-        Wall rightSlingshot = new Wall(255, 430, 265, 330);
-        rightSlingshot.setBounciness(1.2);
-        physicsEngine.addCollisionObject(rightSlingshot);
-
-        // 底部漏斗球道
-        physicsEngine.addCollisionObject(new Wall(5, 390, 105, 474));
-        physicsEngine.addCollisionObject(new Wall(345, 390, 245, 474));
-
-        // 發射通道下段固定引導線
-        physicsEngine.addCollisionObject(new Wall(360, 180, 360, 550));
-
-        dynamicGateWall = new Wall(345.0, 150.0, 385.0, 150.0);
-        dynamicGateWall.setActive(false);
-        physicsEngine.addCollisionObject(dynamicGateWall);
-
-        // 圓形彈簧旁的牆
-        physicsEngine.addCollisionObject(new Wall(320, 100, 330, 120));
-        physicsEngine.addCollisionObject(new Wall(330, 120, 330, 140));
-        physicsEngine.addCollisionObject(new Wall(330, 140, 300, 220));
-        physicsEngine.addCollisionObject(new Wall(260, 260, 250,270));
-        physicsEngine.addCollisionObject(new Wall(250, 270, 290, 250));
-        physicsEngine.addCollisionObject(new Wall(290, 250, 300, 220));
-        SpringWall rightBumperWall = new SpringWall(300, 220, 260, 260, 0.8);
-        rightBumperWall.setBounciness(1.2);
-        physicsEngine.addCollisionObject(rightBumperWall);
-        // 右側
-        physicsEngine.addCollisionObject(new Wall(80, 140, 80, 220));
-        physicsEngine.addCollisionObject(new Wall(140, 240, 80, 260));
-        physicsEngine.addCollisionObject(new Wall(80, 260, 50, 220));
-        physicsEngine.addCollisionObject(new Wall(50, 220, 80, 140));
-        SpringWall leftBumperWall = new SpringWall(80, 220, 140, 240);
-        leftBumperWall.setBounciness(1.5);
-        physicsEngine.addCollisionObject(leftBumperWall);
+        TableBuilder.TableGeometry tableGeometry = tableBuilder.buildTableGeometries();
+        for (GameObject gameObject : tableGeometry.getObjects()) {
+            physicsEngine.addCollisionObject(gameObject);
+        }
+        dynamicGateWall = tableGeometry.getDynamicGateWall();
+        physicsEngine.configureBumperRespawn(
+                tableGeometry.getBumpers(),
+                tableGeometry.getBumperPositions(),
+                tableGeometry.getBumperPositionIndices());
 
         // 實例化台面動態物件
         Ball ball = new Ball(373.0, 500.0, 8.0);
@@ -251,21 +175,12 @@ public class PrimaryController {
         physicsEngine.addBall(ball);
 
 
-        // initialize bumper position
-        activeBumpers[0] = new Bumper(BUMPER_POSITIONS[0][0], BUMPER_POSITIONS[0][1], 15.0);
-        activeBumpers[1] = new Bumper(BUMPER_POSITIONS[1][0], BUMPER_POSITIONS[1][1], 15.0);
-        activeBumpers[2] = new Bumper(BUMPER_POSITIONS[2][0], BUMPER_POSITIONS[2][1], 15.0);
-        // save bumper positions
-        physicsEngine.addCollisionObject(activeBumpers[0]);
-        physicsEngine.addCollisionObject(activeBumpers[1]);
-        physicsEngine.addCollisionObject(activeBumpers[2]);
-
         leftFlipper = new Flipper(110.0, 480.0, 60.0, 0.48, -0.85, 10.5, 0.95);
         rightFlipper = new Flipper(240.0, 480.0, 60.0, Math.PI - 0.48, Math.PI + 0.85, 10.5, 0.95);
         physicsEngine.addCollisionObject(leftFlipper);
         physicsEngine.addCollisionObject(rightFlipper);
 
-        pinballCanvas = new PinballCanvas(400, 550);
+        pinballCanvas = new PinballCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
         pinballCanvas.setPhysicsEngine(physicsEngine);
 
         plungerBlock = new Rectangle(30, 20, Color.web("#6c7086"));
@@ -286,9 +201,13 @@ public class PrimaryController {
         // 啟動主遊戲迴圈
         gameLoop = new GameLoop(physicsEngine, pinballCanvas) {
             @Override
+            protected void onFixedUpdate(double timeStep) {
+                updateChargePower(timeStep);
+            }
+
+            @Override
             public void handle(long now) {
                 super.handle(now);
-                updateChargePower(0.016);
 
                 Ball chuteBall = physicsEngine.getBalls().isEmpty() ? null : physicsEngine.getBalls().get(0);
                 boolean inChute = (chuteBall != null && chuteBall.getPositionX() > 340);
@@ -301,47 +220,6 @@ public class PrimaryController {
                         }
                     }
 
-                    // check collision
-                    for (int i = 0; i < activeBumpers.length; i++) {
-                        Bumper bumper = activeBumpers[i];
-
-                        // calculate distance
-                        double dx = chuteBall.getPositionX() - bumper.getCenterX();
-                        double dy = chuteBall.getPositionY() - bumper.getCenterY();
-                        double distance = Math.hypot(dx, dy);
-
-                        if (distance < 24.5) {
-                            addScore(bumper.getScoreValue());
-
-                            if (distance > 0) {
-                                double nx = dx / distance;
-                                double ny = dy / distance;
-                                double currentSpeed = Math.hypot(chuteBall.getVelocityX(), chuteBall.getVelocityY());
-                                double bounceSpeed = Math.max(currentSpeed * 1.2, 400.0);
-
-                                chuteBall.setVelocityX(nx * bounceSpeed);
-                                chuteBall.setVelocityY(ny * bounceSpeed);
-                            }
-
-                            int randomIndex = (int) (Math.random() * BUMPER_POSITIONS.length);
-                            while (Arrays.asList(activeBumpersIndex).contains(randomIndex)) {
-                                randomIndex = (int) (Math.random() * BUMPER_POSITIONS.length);
-                            }
-
-                            activeBumpersIndex[i] = randomIndex;
-
-                            double newX = BUMPER_POSITIONS[randomIndex][0];
-                            double newY = BUMPER_POSITIONS[randomIndex][1];
-
-                            bumper.setCenterX(newX);
-                            bumper.setCenterY(newY);
-
-                            rollBumperType(bumper);
-
-                            chuteBall.setPositionX(chuteBall.getPositionX() + chuteBall.getVelocityX() * 0.016);
-                            chuteBall.setPositionY(chuteBall.getPositionY() + chuteBall.getVelocityY() * 0.016);
-                        }
-                    }
                 }
 
                 if (isCharging) {
@@ -441,22 +319,6 @@ public class PrimaryController {
         }
     }
 
-    private void rollBumperType(Bumper bumper) {
-        double rand = Math.random();
-        // diamond bumper :  3%   2000score
-        // gold bumper    : 10%    500score
-        // silver bumper  : 25%    300score
-        // bronze bumper  : 72%    100score
-        if (rand < 0.03) {
-            bumper.setBumperType("Diamond", Color.web("#b9f2ff"), 2000);
-        } else if (rand < 0.13) {
-            bumper.setBumperType("Gold", Color.web("#ffd700"), 500);
-        } else if (rand < 0.38) {
-            bumper.setBumperType("Silver", Color.web("#c0c0c0"), 300);
-        } else {
-            bumper.setBumperType("Bronze", Color.web("#782323"), 100);
-        }
-    }
     public void addScore(int points) {
         score += points;
         scoreLabel.setText("Score: " + score);

@@ -18,6 +18,16 @@ public class GameLoop extends AnimationTimer {
         this.canvas = canvas;
     }
 
+    protected double getTimeStep() {
+        return TIME_STEP;
+    }
+
+    protected void onFixedUpdate(double timeStep) {
+    }
+
+    protected void onFrame(double deltaTime) {
+    }
+
     @Override
     public void handle(long now) {
         if (lastTime == 0L) {
@@ -29,7 +39,7 @@ public class GameLoop extends AnimationTimer {
         lastTime = now;
 
         if (deltaTime > 0.1) {
-            deltaTime = 0.016;
+            deltaTime = TIME_STEP;
         }
 
         accumulator += deltaTime;
@@ -37,8 +47,11 @@ public class GameLoop extends AnimationTimer {
         while (accumulator >= TIME_STEP) {
             physicsEngine.update(TIME_STEP);
             physicsEngine.checkCollision();
+            onFixedUpdate(TIME_STEP);
             accumulator -= TIME_STEP;
         }
+
+        onFrame(deltaTime);
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setFill(Color.web("#102030"));
