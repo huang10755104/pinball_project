@@ -184,14 +184,11 @@ public class PrimaryController {
                 boolean inChute = (chuteBall != null && chuteBall.getPositionX() > 340);
 
                 if (chuteBall != null) {
-                    // 當球衝入主戰場，且閘門還沒關閉時
                     if (!isGateClosed && (chuteBall.getPositionY() < 140.0 || chuteBall.getPositionX() < 340.0)) {
                         isGateClosed = true;
-
                         if (dynamicGateWall != null) {
-                            dynamicGateWall.setActive(true); // 💥 激活牆壁！從此死死堵住通道出口
+                            dynamicGateWall.setActive(true);
                         }
-                        System.out.println("💥 發射通道已偵測球通過，防落閘門已自動鎖定！");
                     }
                 }
 
@@ -214,11 +211,9 @@ public class PrimaryController {
                 if (chuteBall != null) {
                     if (chuteBall.getPositionY() > 600 || chuteBall.getPositionY() < -100 || chuteBall.getPositionX() < -50 || chuteBall.getPositionX() > 450) {
 
-                        // 🌟 死球重生時，將閘門設回失效，下一顆球才能順利打上去
                         if (isGateClosed && dynamicGateWall != null) {
-                            dynamicGateWall.setActive(false); // 🔓 閘門解除、變回穿透狀態
+                            dynamicGateWall.setActive(false);
                             isGateClosed = false;
-                            System.out.println("🔓 球已洗掉，發射通道閘門重新開啟。");
                         }
 
                         chuteBall.setPositionX(365.0);
