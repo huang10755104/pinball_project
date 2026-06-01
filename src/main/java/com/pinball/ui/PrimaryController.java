@@ -13,8 +13,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 
@@ -65,14 +64,97 @@ public class PrimaryController {
 
     @FXML
     private void initialize() {
+        // 幫分數加上字型大小與霓虹青藍（#00f0ff）的發光效果 (dropshadow)
+        scoreLabel.setStyle(
+                "-fx-font-family: 'Consolas', 'Monospaced';" +
+                        "-fx-font-size: 24px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #00f0ff;" +
+                        "-fx-effect: dropshadow(three-pass-box, rgba(0,240,255,0.4), 8, 0, 0, 0);"
+        );
+
+        livesLabel.setStyle(
+                "-fx-font-size: 20px;" +
+                        "-fx-text-fill: #ff5555;" +
+                        "-fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);"
+        );
+
+
+        if (scoreLabel.getParent() instanceof VBox) {
+            VBox rightPanel = (VBox) scoreLabel.getParent();
+
+            rightPanel.setStyle("-fx-background-color: #0d1117; -fx-padding: 25; -fx-alignment: TOP_CENTER;");
+            rightPanel.setSpacing(25);
+
+            // PINBALL GAME title
+            VBox titleBox = new VBox(2);
+            titleBox.setAlignment(javafx.geometry.Pos.CENTER);
+
+            Label pLabel = new Label("PINBALL");
+            pLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: 900; -fx-text-fill: #ff007f; -fx-effect: dropshadow(three-pass-box, rgba(255,0,127,0.5), 10, 0, 0, 0);");
+
+            Label gLabel = new Label("GAME");
+            gLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: #00f0ff; -fx-effect: dropshadow(three-pass-box, rgba(0,240,255,0.5), 10, 0, 0, 0);");
+
+            titleBox.getChildren().addAll(pLabel, gLabel);
+
+            // create control hints
+            VBox hintsCard = new VBox(10);
+            hintsCard.setStyle(
+                    "-fx-background-color: #1e1e2e;" +     // 獨立深色卡片背景
+                            "-fx-background-radius: 8;" +
+                            "-fx-border-color: #313244;" +          // 卡片細暗框
+                            "-fx-border-radius: 8;" +
+                            "-fx-padding: 15;" +
+                            "-fx-fill-width: true;"
+            );
+
+            Label cardTitle = new Label("CONTROLS 🎮");
+            cardTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #f5c2e7;");
+            hintsCard.getChildren().add(cardTitle);
+
+            // 加入三行快捷鍵提示
+            hintsCard.getChildren().add(createHintRow("發射球：", "長按 SPACE", "#89b4fa"));
+            hintsCard.getChildren().add(createHintRow("左撥片：", "◀ 左方向鍵 ", "#74c7ec"));
+            hintsCard.getChildren().add(createHintRow("右撥片：", "右方向鍵 ▶", "#74c7ec"));
+
+            // 🌟 5. 重新調整右側面板的排列順序，讓標題在最上面、卡片在最下面
+            rightPanel.getChildren().clear();
+
+            // 建立一個彈性墊片，自動把操作卡片推到最右下角
+            Region spacer = new Region();
+            VBox.setVgrow(spacer, Priority.ALWAYS);
+
+            // 依序排列：大標題 -> 分數標籤 -> 生命值標籤 -> 彈性墊片 -> 操作卡片
+            rightPanel.getChildren().addAll(titleBox, scoreLabel, livesLabel, spacer, hintsCard);
+        }
+
+        // 啟動遊戲
         startGame();
+    }
+
+    private HBox createHintRow(String labelText, String keyText, String keyColor) {
+        HBox row = new HBox();
+        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        Label lbl = new Label(labelText);
+        lbl.setStyle("-fx-text-fill: #a6adc8; -fx-font-size: 12px;");
+
+        Region innerSpacer = new Region();
+        HBox.setHgrow(innerSpacer, Priority.ALWAYS); // 讓左右推開排整齊
+
+        Label key = new Label(keyText);
+        key.setStyle("-fx-text-fill: " + keyColor + "; -fx-font-weight: bold; -fx-font-size: 12px;");
+
+        row.getChildren().addAll(lbl, innerSpacer, key);
+        return row;
     }
 
     @FXML
     private void startGame() {
         score = 0;
         lives = 3;
-        scoreLabel.setText("Score: " + score);
+        scoreLabel.setText("000000");
         livesLabel.setText("Balls: " + lives);
         gameOverOverlay.setVisible(false);
 
@@ -346,7 +428,8 @@ public class PrimaryController {
 
     public void addScore(int points) {
         score += points;
-        scoreLabel.setText("Score: " + score); 
+        scoreLabel.setText(String.format("%06d", score));
+
     }
 
     private void handleGameOver() {
