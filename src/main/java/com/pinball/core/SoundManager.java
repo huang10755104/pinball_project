@@ -6,7 +6,8 @@ import java.net.URL;
 public class SoundManager {
     private AudioClip bumperSound;
     private AudioClip flipperSound;
-    private long lastBounceTime = 0;
+    private long lastBumperTime = 0;
+    private long lastFlipperTime = 0;
 
     public SoundManager() {
         // 預載音效
@@ -37,9 +38,9 @@ public class SoundManager {
         if (bumperSound != null) {
             long currentTime = System.currentTimeMillis();
             
-            if (currentTime - lastBounceTime > 50) {
+            if (currentTime - lastBumperTime > 50) {
                 bumperSound.play(volume);
-                lastBounceTime = currentTime;
+                lastBumperTime = currentTime;
             }
         }
     }
@@ -48,9 +49,9 @@ public class SoundManager {
         if (flipperSound != null) {
             long currentTime = System.currentTimeMillis();
             
-            if (currentTime - lastBounceTime > 50) {
+            if (currentTime - lastFlipperTime > 50) {
                 flipperSound.play(0.35);
-                lastBounceTime = currentTime;
+                lastFlipperTime = currentTime;
             }
             
         }
