@@ -47,20 +47,23 @@ public class Ball implements Renderable {
     }
 
     @Override
-    public void draw(GraphicsContext gc) {
-        double diameter = radius * 2.0;
-        
+    public void draw(javafx.scene.canvas.GraphicsContext gc) {
+        double diameter = radius * 2;
         if (ballImage != null) {
-            // 使用圖像繪製彈珠
             gc.drawImage(ballImage, positionX - radius, positionY - radius, diameter, diameter);
-        } else {
-            // 預設幾何繪製
-            gc.setFill(Color.GOLD);
-            gc.fillOval(positionX - radius, positionY - radius, diameter, diameter);
-            // gc.setStroke(Color.BLACK);
-            // gc.setLineWidth(2.0);
-            // gc.strokeOval(positionX - radius, positionY - radius, diameter, diameter);
+            return;
         }
+
+        // 建立一個跟著球心移動的放射漸層
+        javafx.scene.paint.RadialGradient ballGrad = new javafx.scene.paint.RadialGradient(
+                -0.2, -0.2, positionX, positionY, radius, false, javafx.scene.paint.CycleMethod.NO_CYCLE,
+                new javafx.scene.paint.Stop(0, javafx.scene.paint.Color.WHITE),       // 球心反光點
+                new javafx.scene.paint.Stop(0.6, javafx.scene.paint.Color.GOLD),      // 主體金色
+                new javafx.scene.paint.Stop(1, javafx.scene.paint.Color.DARKGOLDENROD) // 邊緣陰影深金色
+        );
+
+        gc.setFill(ballGrad);
+        gc.fillOval(positionX - radius, positionY - radius, diameter, diameter);
     }
 
     public void setBallImage(Image ballImage) {

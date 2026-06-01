@@ -25,9 +25,9 @@ public class TableBuilder {
 
     public List<GameObject> buildTableGeometries() {
         List<GameObject> objects = new ArrayList<>();
-        
+
         // Attack Bumpers (Exact float values mapped from DAT center points)
-        double bumperRadius = 15.0 * scaleX; 
+        double bumperRadius = 15.0 * scaleX;
         objects.add(new Bumper(mapX(295.0), mapY(100.0), bumperRadius));
         objects.add(new Bumper(mapX(240.0), mapY(140.0), bumperRadius));
         objects.add(new Bumper(mapX(350.0), mapY(140.0), bumperRadius));
@@ -42,7 +42,7 @@ public class TableBuilder {
 
         return objects;
     }
-    
+
     public List<Wall> buildBoundaryWalls() {
         List<Wall> walls = new ArrayList<>();
         // Slingshots & Table Hull (Bounds)

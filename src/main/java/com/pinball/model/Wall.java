@@ -22,10 +22,13 @@ public class Wall extends GameObject {
     }
 
     @Override
-    public void draw(GraphicsContext gc) {
-        gc.setStroke(Color.web("#45475a"));
-        gc.setLineWidth(3.0);
+    public void draw(javafx.scene.canvas.GraphicsContext gc) {
+        gc.setStroke(javafx.scene.paint.Color.web("#30b5c7"));
+        gc.setLineWidth(4.0);
         gc.strokeLine(startX, startY, endX, endY);
+        gc.setFill(javafx.scene.paint.Color.web("#30b5c7"));
+        gc.fillOval(startX - 2, startY - 2, 4, 4);
+        gc.fillOval(endX - 2, endY - 2, 4, 4);
     }
 
     public double getStartX() {

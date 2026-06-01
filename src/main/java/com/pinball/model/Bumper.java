@@ -3,6 +3,9 @@ package com.pinball.model;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.Stop;
 
 public class Bumper extends GameObject {
     private double centerX;
@@ -23,19 +26,24 @@ public class Bumper extends GameObject {
         this.radius = radius;
     }
 
+
+
     @Override
     public void draw(GraphicsContext gc) {
         double diameter = radius * 2.0;
-        
+        RadialGradient neonGrad = new RadialGradient(
+                0, 0, centerX, centerY, radius, false, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.WHITE),
+                new Stop(0.4, Color.DEEPPINK),
+                new Stop(1, Color.TRANSPARENT)
+        );
+
         if (bumperImage != null) {
             // 使用圖像繪製碰撞球
             gc.drawImage(bumperImage, centerX - radius, centerY - radius, diameter, diameter);
         } else {
-            // 預設幾何繪製
-            gc.setFill(Color.ORANGERED);
-            gc.fillOval(centerX - radius, centerY - radius, diameter, diameter);
-            gc.setStroke(Color.WHITE);
-            gc.strokeOval(centerX - radius, centerY - radius, diameter, diameter);
+            gc.setFill(neonGrad);
+            gc.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
         }
     }
 
