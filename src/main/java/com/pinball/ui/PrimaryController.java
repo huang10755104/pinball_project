@@ -70,7 +70,7 @@ public class PrimaryController {
         // 分數標籤樣式
         scoreLabel.setStyle(
                 "-fx-font-family: 'Consolas', 'Monospaced';" +
-                        "-fx-font-size: 20px;" +
+                        "-fx-font-size: 24px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-text-fill: #00f0ff;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(0,240,255,0.4), 8, 0, 0, 0);"
@@ -78,8 +78,8 @@ public class PrimaryController {
 
         // 生命值標籤樣式
         livesLabel.setStyle(
-                "-fx-font-size: 16px;" +
-                        "-fx-text-fill: #ff5555;" +
+                "-fx-font-size: 22px;" +
+                        "-fx-text-fill: #4fc742;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);"
         );
 
@@ -94,10 +94,10 @@ public class PrimaryController {
             titleBox.setAlignment(javafx.geometry.Pos.CENTER);
 
             Label pLabel = new Label("PINBALL");
-            pLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: 900; -fx-text-fill: #ff007f; -fx-effect: dropshadow(three-pass-box, rgba(255,0,127,0.5), 10, 0, 0, 0);");
+            pLabel.setStyle("-fx-font-family: 'Consolas', 'Monospaced'; -fx-font-size: 36px; -fx-font-weight: 900; -fx-text-fill: #ff007f; -fx-effect: dropshadow(three-pass-box, rgba(255,0,127,0.5), 10, 0, 0, 0);");
 
             Label gLabel = new Label("GAME");
-            gLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: #00f0ff; -fx-effect: dropshadow(three-pass-box, rgba(0,240,255,0.5), 10, 0, 0, 0);");
+            gLabel.setStyle("-fx-font-family: 'Consolas', 'Monospaced'; -fx-font-size: 32px; -fx-font-weight: 900; -fx-text-fill: #00f0ff; -fx-effect: dropshadow(three-pass-box, rgba(0,240,255,0.5), 10, 0, 0, 0);");
 
             titleBox.getChildren().addAll(pLabel, gLabel);
 
@@ -413,7 +413,8 @@ public class PrimaryController {
                         chuteBall.setVelocityY(0);
 
                         lives--;
-
+                        if (lives==2) livesLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: #c7c742; -fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);");
+                        else if (lives==1) livesLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: #ba0909; -fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);");
                         livesLabel.setText("Balls: "+ lives);
 
                         if (lives == 0) {
