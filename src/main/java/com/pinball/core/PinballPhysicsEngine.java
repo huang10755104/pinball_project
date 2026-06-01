@@ -23,7 +23,11 @@ public class PinballPhysicsEngine implements PhysicsEngine {
     private SoundManager sound;
     private IntConsumer onScoreAdded; 
 
-    // 設定監聽器的方法
+    // 🌟 這裡統一改成基本型態 int[] 陣列
+    private Bumper[] activeBumpers;
+    private double[][] bumperPositions;
+    private int[] activeBumpersIndex;
+
     public void setOnScoreAdded(IntConsumer listener) {
         this.onScoreAdded = listener;
     }
@@ -58,6 +62,13 @@ public class PinballPhysicsEngine implements PhysicsEngine {
 
     public void removeCollisionObject(GameObject gameObject) {
         collisionObjects.remove(gameObject);
+    }
+
+    // 🌟 這裡的方法簽章也統一改成接收 int[] indices
+    public void configureBumperRespawn(Bumper[] bumpers, double[][] positions, int[] indices) {
+        this.activeBumpers = bumpers;
+        this.bumperPositions = positions;
+        this.activeBumpersIndex = indices;
     }
 
     @Override
@@ -130,7 +141,6 @@ public class PinballPhysicsEngine implements PhysicsEngine {
 
         if (travelDistance > 0.0) {
             double[] hitPoint = new double[2];
-            // 檢查球心軌跡是否直接切過檔板線段
             double hitDistance = rayIntersectLine(
                     originX, originY, 
                     deltaX / travelDistance, deltaY / travelDistance, travelDistance,
@@ -141,7 +151,6 @@ public class PinballPhysicsEngine implements PhysicsEngine {
             }
         }
 
-        // 修正：如果距離大於半徑，且「沒有」發生軌跡交叉，才判定為未碰撞
         if (distance > ball.getRadius() && !crossed) {
             return;
         }
@@ -257,8 +266,57 @@ public class PinballPhysicsEngine implements PhysicsEngine {
         ball.setPositionY(contactY + normalY * CONTACT_EPSILON);
         ball.setVelocityX(reflectedVelocityX);
         ball.setVelocityY(reflectedVelocityY);
+        
         bumper.registerHit();
-        sound.playBumper(0.3);
+        if (sound != null) {
+            sound.playBumper(0.3);
+        }
+
+        // 隊友的隨機 Bumper 類型切換系統
+        double rand = Math.random();
+        if (rand < 0.03) {
+            bumper.setBumperType("Diamond", javafx.scene.paint.Color.web("#b9f2ff"), 2000);
+        } else if (rand < 0.13) {
+            bumper.setBumperType("Gold", javafx.scene.paint.Color.web("#ffd700"), 500);
+        } else if (rand < 0.38) {
+            bumper.setBumperType("Silver", javafx.scene.paint.Color.web("#c0c0c0"), 300);
+        } else {
+            bumper.setBumperType("Bronze", javafx.scene.paint.Color.web("#782323"), 100);
+        }
+
+        // 🌟 這裡的 for 迴圈也完美改成走純 int 分支
+        if (activeBumpers != null && bumperPositions != null && activeBumpersIndex != null) {
+            int bumperIdx = -1;
+            for (int i = 0; i < activeBumpers.length; i++) {
+                if (activeBumpers[i] == bumper) {
+                    bumperIdx = i;
+                    break;
+                }
+            }
+            if (bumperIdx != -1) {
+                int randomIndex = (int) (Math.random() * bumperPositions.length);
+                boolean contains = true;
+                int attempts = 0;
+                while (contains && attempts < 100) {
+                    contains = false;
+                    for (int idx : activeBumpersIndex) {
+                        if (idx == randomIndex) {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if (contains) {
+                        randomIndex = (int) (Math.random() * bumperPositions.length);
+                    }
+                    attempts++;
+                }
+
+                activeBumpersIndex[bumperIdx] = randomIndex;
+                bumper.setCenterX(bumperPositions[randomIndex][0]);
+                bumper.setCenterY(bumperPositions[randomIndex][1]);
+            }
+        }
+
         if (onScoreAdded != null) {
             onScoreAdded.accept(bumper.getScoreValue()); 
         }
@@ -285,18 +343,15 @@ public class PinballPhysicsEngine implements PhysicsEngine {
         normalX /= normalLength;
         normalY /= normalLength;
 
-        // 確保法向量朝向球的來向
         if ((originX - wall.getStartX()) * normalX + (originY - wall.getStartY()) * normalY < 0) {
             normalX = -normalX;
             normalY = -normalY;
         }
 
-        // --- 1. 連續碰撞檢測 (CCD)：對平移後的虛擬牆壁射線檢測 ---
         if (travelDistance > 0.0) {
             double directionX = deltaX / travelDistance;
             double directionY = deltaY / travelDistance;
             
-            // 將牆壁向外平移球的半徑長度，建立「虛擬牆壁」
             double r = ball.getRadius();
             double vStartX = wall.getStartX() + normalX * r;
             double vStartY = wall.getStartY() + normalY * r;
@@ -305,7 +360,6 @@ public class PinballPhysicsEngine implements PhysicsEngine {
 
             double[] hitPoint = new double[2];
             
-            // 使用虛擬牆壁進行相交測試
             double hitDistance = rayIntersectLine(
                     originX, originY, directionX, directionY, travelDistance,
                     vStartX, vStartY, vEndX, vEndY, hitPoint);
@@ -320,7 +374,7 @@ public class PinballPhysicsEngine implements PhysicsEngine {
                     double reflectedVelocityY;
 
                     if (wall instanceof SpringWall springWall) {
-                        double influence = 0.1; // 僅保留 10% 原速度影響
+                        double influence = 0.1;
                         double kick = springWall.getKickForce();
                         reflectedVelocityX = velocityX * influence + normalX * kick;
                         reflectedVelocityY = velocityY * influence + normalY * kick;
@@ -331,14 +385,11 @@ public class PinballPhysicsEngine implements PhysicsEngine {
                     }
 
                     double remainingDistance = Math.max(0.0, travelDistance - hitDistance);
-
-                    // 2. 算出反彈後的新移動方向
                     double currentSpeed = Math.hypot(reflectedVelocityX, reflectedVelocityY);
                     if (currentSpeed > 0.0) {
                         double dirX = reflectedVelocityX / currentSpeed;
                         double dirY = reflectedVelocityY / currentSpeed;
                         
-                        // 交點 + 微小法線偏移(防黏牆) + 沿著新方向走完剩下的距離
                         ball.setPositionX(hitPoint[0] + normalX * CONTACT_EPSILON + dirX * remainingDistance);
                         ball.setPositionY(hitPoint[1] + normalY * CONTACT_EPSILON + dirY * remainingDistance);
                     } else {
@@ -346,7 +397,6 @@ public class PinballPhysicsEngine implements PhysicsEngine {
                         ball.setPositionY(hitPoint[1] + normalY * CONTACT_EPSILON);
                     }
 
-                    // 寫入新速度並結束
                     ball.setVelocityX(reflectedVelocityX);
                     ball.setVelocityY(reflectedVelocityY);
                     return;
@@ -354,12 +404,9 @@ public class PinballPhysicsEngine implements PhysicsEngine {
             }
         }
 
-        // --- 2. 靜態距離檢測 (DCD Fallback)：處理牆壁端點(角落)擦撞 ---
-        // 重新取得當前座標
         ballX = ball.getPositionX();
         ballY = ball.getPositionY();
 
-        // 找出球心到真實牆壁線段的最短距離點
         double t = ((ballX - wall.getStartX()) * wallDx + (ballY - wall.getStartY()) * wallDy) / wallLenSq;
         t = Math.max(0.0, Math.min(1.0, t));
 
@@ -370,12 +417,10 @@ public class PinballPhysicsEngine implements PhysicsEngine {
         double offsetY = ballY - closestY;
         double distance = Math.hypot(offsetX, offsetY);
 
-        // 若球體邊緣已嵌入牆壁內部 (包含牆壁的兩端角落)
         if (distance > 0.0 && distance < ball.getRadius()) {
             double pushNormalX = offsetX / distance;
             double pushNormalY = offsetY / distance;
 
-            // 擠出牆外
             ball.setPositionX(closestX + pushNormalX * (ball.getRadius() + CONTACT_EPSILON));
             ball.setPositionY(closestY + pushNormalY * (ball.getRadius() + CONTACT_EPSILON));
 

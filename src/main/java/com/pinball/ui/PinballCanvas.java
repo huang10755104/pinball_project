@@ -7,6 +7,7 @@ import com.pinball.model.GameObject;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
@@ -15,6 +16,8 @@ import javafx.scene.paint.Stop;
 public class PinballCanvas extends Canvas implements Renderable {
     private PinballPhysicsEngine physicsEngine;
     private Image backgroundImage;
+    private Image staticLayer;
+    private boolean staticDirty = true;
 
     public PinballCanvas() {
         this(800, 600);
@@ -22,6 +25,8 @@ public class PinballCanvas extends Canvas implements Renderable {
 
     public PinballCanvas(double width, double height) {
         super(width, height);
+        widthProperty().addListener((obs, oldValue, newValue) -> staticDirty = true);
+        heightProperty().addListener((obs, oldValue, newValue) -> staticDirty = true);
     }
 
     public void setPhysicsEngine(PinballPhysicsEngine physicsEngine) {
@@ -30,6 +35,42 @@ public class PinballCanvas extends Canvas implements Renderable {
 
     public void setBackgroundImage(Image backgroundImage) {
         this.backgroundImage = backgroundImage;
+        staticDirty = true;
+    }
+
+    private void ensureStaticLayer() {
+        if (!staticDirty && staticLayer != null) {
+            return;
+        }
+
+        double width = getWidth();
+        double height = getHeight();
+        if (width <= 0.0 || height <= 0.0) {
+            return;
+        }
+
+        Canvas staticCanvas = new Canvas(width, height);
+        GraphicsContext gc = staticCanvas.getGraphicsContext2D();
+
+        if (backgroundImage != null) {
+            gc.drawImage(backgroundImage, 0.0, 0.0, width, height);
+        } else {
+            gc.setFill(Color.web("#0d1117"));
+            gc.fillRect(0.0, 0.0, width, height);
+            gc.setStroke(Color.web("#161b22", 0.3));
+            gc.setLineWidth(1.0);
+            for (int x = 0; x < width; x += 30) {
+                gc.strokeLine(x, 0, x, height);
+            }
+            for (int y = 0; y < height; y += 30) {
+                gc.strokeLine(0, y, width, y);
+            }
+        }
+
+        drawCyberpanes(gc);
+        WritableImage snapshot = new WritableImage((int) Math.ceil(width), (int) Math.ceil(height));
+        staticLayer = staticCanvas.snapshot(null, snapshot);
+        staticDirty = false;
     }
     private void drawCyberpanes(GraphicsContext gc) {
         gc.setLineWidth(2.0);
@@ -76,23 +117,10 @@ public class PinballCanvas extends Canvas implements Renderable {
             return;
         }
 
-
-        if (backgroundImage != null) {
-            gc.drawImage(backgroundImage, 0.0, 0.0, getWidth(), getHeight());
-        } else {
-            // background
-            gc.setFill(Color.web("#0d1117"));
-            gc.fillRect(0.0, 0.0, getWidth(), getHeight());
-            gc.setStroke(Color.web("#161b22", 0.3));
-            gc.setLineWidth(1.0);
-            for (int x = 0; x < getWidth(); x += 30) {
-                gc.strokeLine(x, 0, x, getHeight());
-            }
-            for (int y = 0; y < getHeight(); y += 30) {
-                gc.strokeLine(0, y, getWidth(), y);
-            }
+        ensureStaticLayer();
+        if (staticLayer != null) {
+            gc.drawImage(staticLayer, 0.0, 0.0, getWidth(), getHeight());
         }
-        drawCyberpanes(gc);
         // 3. 繪製遊戲環境物件（例如牆壁、Bumper 等）
         for (GameObject gameObject : physicsEngine.getCollisionObjects()) {
             if (gameObject.isActive()) {
