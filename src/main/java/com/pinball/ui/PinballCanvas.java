@@ -46,7 +46,10 @@ public class PinballCanvas extends Canvas implements Renderable {
 
         // 繪製遊戲物件
         for (GameObject gameObject : physicsEngine.getCollisionObjects()) {
-            gameObject.draw(gc);
+            // 🌟 核心修改：只有當物件目前是啟用的（Active），才把它畫出來！
+            if (gameObject.isActive()) {
+                gameObject.draw(gc);
+            }
         }
 
         // 繪製彈珠
