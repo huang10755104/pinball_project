@@ -243,7 +243,6 @@ public class PrimaryController {
         SpringWall leftBumperWall = new SpringWall(80, 220, 140, 240);
         leftBumperWall.setBounciness(1.5);
         physicsEngine.addCollisionObject(leftBumperWall);
-        // =======================================================
 
         // 實例化台面動態物件
         Ball ball = new Ball(373.0, 500.0, 8.0);
@@ -301,44 +300,49 @@ public class PrimaryController {
                             dynamicGateWall.setActive(true);
                         }
                     }
+
+                    // check collision
                     for (int i = 0; i < activeBumpers.length; i++) {
                         Bumper bumper = activeBumpers[i];
-                        // counting distance
+
+                        // calculate distance
                         double dx = chuteBall.getPositionX() - bumper.getCenterX();
                         double dy = chuteBall.getPositionY() - bumper.getCenterY();
                         double distance = Math.hypot(dx, dy);
-                        // checking collision
+
                         if (distance < 24.5) {
-                            addScore(1000);
+                            addScore(bumper.getScoreValue());
+
                             if (distance > 0) {
-                                double nx = dx / distance; // 碰撞法向量 X
-                                double ny = dy / distance; // 碰撞法向量 Y
-                                // 計算球原本的速度大小 (Speed)
+                                double nx = dx / distance;
+                                double ny = dy / distance;
                                 double currentSpeed = Math.hypot(chuteBall.getVelocityX(), chuteBall.getVelocityY());
-                                // 給予一個基礎反彈噴射速度（確保即便是慢速滾入，也會被強力彈開）
                                 double bounceSpeed = Math.max(currentSpeed * 1.2, 400.0);
-                                // 設定新速度方向：沿著碰撞中心點向外散射
+
                                 chuteBall.setVelocityX(nx * bounceSpeed);
                                 chuteBall.setVelocityY(ny * bounceSpeed);
                             }
+
                             int randomIndex = (int) (Math.random() * BUMPER_POSITIONS.length);
-                            while (Arrays.asList(activeBumpersIndex).contains(randomIndex)){
+                            while (Arrays.asList(activeBumpersIndex).contains(randomIndex)) {
                                 randomIndex = (int) (Math.random() * BUMPER_POSITIONS.length);
                             }
+
+                            activeBumpersIndex[i] = randomIndex;
 
                             double newX = BUMPER_POSITIONS[randomIndex][0];
                             double newY = BUMPER_POSITIONS[randomIndex][1];
 
                             bumper.setCenterX(newX);
                             bumper.setCenterY(newY);
+
+                            rollBumperType(bumper);
+
                             chuteBall.setPositionX(chuteBall.getPositionX() + chuteBall.getVelocityX() * 0.016);
                             chuteBall.setPositionY(chuteBall.getPositionY() + chuteBall.getVelocityY() * 0.016);
-
-
                         }
                     }
                 }
-
 
                 if (isCharging) {
                     double visualOffset = chargePower * 0.04;
@@ -356,6 +360,7 @@ public class PrimaryController {
                         chuteBall.setVelocityY(0);
                     }
                 }
+
                 if (chuteBall != null) {
                     if (chuteBall.getPositionY() > 600 || chuteBall.getPositionY() < -100 || chuteBall.getPositionX() < -50 || chuteBall.getPositionX() > 450) {
 
@@ -370,7 +375,9 @@ public class PrimaryController {
                         chuteBall.setVelocityY(0);
 
                         lives--;
-                        livesLabel.setText("Balls: " + lives);
+
+                        livesLabel.setText("Balls: "+ lives);
+
                         if (lives == 0) {
                             handleGameOver();
                         }
@@ -434,6 +441,22 @@ public class PrimaryController {
         }
     }
 
+    private void rollBumperType(Bumper bumper) {
+        double rand = Math.random();
+        // diamond bumper :  3%   10000score
+        // gold bumper    : 10%    2500score
+        // silver bumper  : 25%    1500score
+        // bronze bumper  : 72%     500score
+        if (rand < 0.03) {
+            bumper.setBumperType("Diamond", Color.web("#b9f2ff"), 10000);
+        } else if (rand < 0.13) {
+            bumper.setBumperType("Gold", Color.web("#ffd700"), 2500);
+        } else if (rand < 0.38) {
+            bumper.setBumperType("Silver", Color.web("#c0c0c0"), 1500);
+        } else {
+            bumper.setBumperType("Bronze", Color.web("##782323"), 500);
+        }
+    }
     public void addScore(int points) {
         score += points;
         scoreLabel.setText("Score: " + score);

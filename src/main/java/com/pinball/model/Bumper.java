@@ -11,10 +11,11 @@ public class Bumper extends GameObject {
     private double centerX;
     private double centerY;
     private double radius;
-    private int scoreValue = 1000;
     private int score;
     private Image bumperImage;
-
+    private Color bumperColor = Color.web("#782323"); // 預設青銅色
+    private int scoreValue = 100;
+    private String typeName = "Bronze";
     public Bumper(double centerX, double centerY, double radius) {
         this(centerX, centerY, radius, 0.9);
     }
@@ -25,26 +26,26 @@ public class Bumper extends GameObject {
         this.centerY = centerY;
         this.radius = radius;
     }
+    public void setBumperType(String name, Color color, int score) {
+        this.typeName = name;
+        this.bumperColor = color;
+        this.scoreValue = score;
+    }
 
 
 
     @Override
     public void draw(GraphicsContext gc) {
-        double diameter = radius * 2.0;
-        RadialGradient neonGrad = new RadialGradient(
-                0, 0, centerX, centerY, radius, false, CycleMethod.NO_CYCLE,
-                new Stop(0, Color.WHITE),
-                new Stop(0.4, Color.DEEPPINK),
-                new Stop(1, Color.TRANSPARENT)
-        );
 
-        if (bumperImage != null) {
-            // 使用圖像繪製碰撞球
-            gc.drawImage(bumperImage, centerX - radius, centerY - radius, diameter, diameter);
-        } else {
-            gc.setFill(neonGrad);
-            gc.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
-        }
+        gc.setStroke(bumperColor);
+        gc.setLineWidth(3.0);
+        gc.strokeOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
+
+        gc.setFill(bumperColor.deriveColor(0, 1, 1, 0.25));
+        gc.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
+
+        gc.setFill(bumperColor);
+        gc.fillOval(centerX - 3, centerY - 3, 6, 6);
     }
 
     public void setBumperImage(Image bumperImage) {
