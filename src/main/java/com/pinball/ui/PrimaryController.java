@@ -70,14 +70,14 @@ public class PrimaryController {
         // adding score
         scoreLabel.setStyle(
                 "-fx-font-family: 'Consolas', 'Monospaced';" +
-                        "-fx-font-size: 24px;" +
+                        "-fx-font-size: 20px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-text-fill: #00f0ff;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(0,240,255,0.4), 8, 0, 0, 0);"
         );
 
         livesLabel.setStyle(
-                "-fx-font-size: 20px;" +
+                "-fx-font-size: 16px;" +
                         "-fx-text-fill: #ff5555;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);"
         );
@@ -443,18 +443,18 @@ public class PrimaryController {
 
     private void rollBumperType(Bumper bumper) {
         double rand = Math.random();
-        // diamond bumper :  3%   10000score
-        // gold bumper    : 10%    2500score
-        // silver bumper  : 25%    1500score
-        // bronze bumper  : 72%     500score
+        // diamond bumper :  3%   2000score
+        // gold bumper    : 10%    500score
+        // silver bumper  : 25%    300score
+        // bronze bumper  : 72%    100score
         if (rand < 0.03) {
-            bumper.setBumperType("Diamond", Color.web("#b9f2ff"), 10000);
+            bumper.setBumperType("Diamond", Color.web("#b9f2ff"), 1000);
         } else if (rand < 0.13) {
-            bumper.setBumperType("Gold", Color.web("#ffd700"), 2500);
+            bumper.setBumperType("Gold", Color.web("#ffd700"), 250);
         } else if (rand < 0.38) {
-            bumper.setBumperType("Silver", Color.web("#c0c0c0"), 1500);
+            bumper.setBumperType("Silver", Color.web("#c0c0c0"), 150);
         } else {
-            bumper.setBumperType("Bronze", Color.web("##782323"), 500);
+            bumper.setBumperType("Bronze", Color.web("#782323"), 50);
         }
     }
     public void addScore(int points) {
