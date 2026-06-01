@@ -157,7 +157,7 @@ public class PrimaryController {
         physicsEngine.addCollisionObject(new Wall(140, 240, 80, 260));
         physicsEngine.addCollisionObject(new Wall(80, 260, 50, 220));
         physicsEngine.addCollisionObject(new Wall(50, 220, 80, 140));
-        Ball ball = new Ball(365.0, 500.0, 8.0);
+        Ball ball = new Ball(373.0, 500.0, 8.0);
         ball.setVelocityX(0.0);
         ball.setVelocityY(0.0);
         physicsEngine.addBall(ball);
@@ -181,7 +181,7 @@ public class PrimaryController {
         pinballCanvas.setPhysicsEngine(physicsEngine);
 
         plungerBlock = new Rectangle(30, 20, Color.web("#6c7086"));
-        plungerBlock.setTranslateX(165);
+        plungerBlock.setTranslateX(172);
         plungerBlock.setTranslateY(240);
 
         canvasContainer.getChildren().clear(); // 清理舊元件避免重疊
@@ -274,7 +274,7 @@ public class PrimaryController {
                             isGateClosed = false;
                         }
 
-                        chuteBall.setPositionX(365.0);
+                        chuteBall.setPositionX(373.0);
                         chuteBall.setPositionY(500.0);
                         chuteBall.setVelocityX(0);
                         chuteBall.setVelocityY(0);
