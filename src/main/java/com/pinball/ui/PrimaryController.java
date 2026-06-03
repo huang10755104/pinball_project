@@ -64,6 +64,7 @@ public class PrimaryController {
     // saving bumper locations
     private final Bumper[] activeBumpers = new Bumper[3];
     private final Integer[] activeBumpersIndex = {0,1,2};
+    
     @FXML
     private void initialize() {
         // 分數標籤樣式
@@ -190,6 +191,7 @@ public class PrimaryController {
         row.getChildren().addAll(nameLbl, innerSpacer, scoreLbl);
         return row;
     }
+
     @FXML
     private void startGame() {
         score = 0;
@@ -197,6 +199,8 @@ public class PrimaryController {
         scoreLabel.setText("Score: " + score);
         livesLabel.setText("Balls: " + lives);
         gameOverOverlay.setVisible(false);
+
+        sound.playSoldierDream();
 
         // 重置動態閘門狀態
         dynamicGateWall = null;
@@ -412,9 +416,15 @@ public class PrimaryController {
                         chuteBall.setVelocityY(0);
 
                         lives--;
-                        if (lives==2) livesLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: #c7c742; -fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);");
-                        else if (lives==1) livesLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: #ba0909; -fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);");
-                        livesLabel.setText("Balls: "+ lives);
+                        
+                        // 🌟 核心修正：將音樂切換精準鎖在大括號內部
+                        if (lives == 2) {
+                            livesLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: #c7c742; -fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);");
+                        } else if (lives == 1) {
+                            livesLabel.setStyle("-fx-font-size: 22px; -fx-text-fill: #ba0909; -fx-effect: dropshadow(three-pass-box, rgba(255,85,85,0.3), 8, 0, 0, 0);");
+                            sound.switchToMoonHalo(); // 僅在剩下一球時高潮切換
+                        }
+                        livesLabel.setText("Balls: " + lives);
 
                         if (lives == 0) {
                             handleGameOver();
@@ -495,16 +505,19 @@ public class PrimaryController {
             bumper.setBumperType("Bronze", Color.web("#782323"), 100);
         }
     }
+
     public void addScore(int points) {
         score += points;
         scoreLabel.setText("Score: " + score);
-
     }
 
     private void handleGameOver() {
         gameLoop.stop(); 
         finalScoreLabel.setText("Final Score: " + score);
         gameOverOverlay.setVisible(true);
+
+        // 🌟 觸發精神污染 Rickroll 機制
+        sound.playRickroll();
     }
 
     @FXML
