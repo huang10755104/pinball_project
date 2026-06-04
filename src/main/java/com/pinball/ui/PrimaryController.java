@@ -263,7 +263,7 @@ public class PrimaryController {
         // 發射通道下段固定引導線
         physicsEngine.addCollisionObject(new Wall(360, 180, 360, 550));
 
-        dynamicGateWall = new Wall(345.0, 150.0, 385.0, 150.0);
+        dynamicGateWall = new Wall(345.0, 150.0, 385.0, 140.0);
         dynamicGateWall.setActive(false);
         physicsEngine.addCollisionObject(dynamicGateWall);
 
