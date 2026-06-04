@@ -6,8 +6,8 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
 public class Ball implements Renderable {
-    private static final double DEFAULT_RADIUS = 12.0;
-    private static final double DEFAULT_GRAVITY = 980.0;
+    private static final double DEFAULT_RADIUS = 15.0;
+    private static final double DEFAULT_GRAVITY = 900.0;
 
     private double previousPositionX;
     private double previousPositionY;
